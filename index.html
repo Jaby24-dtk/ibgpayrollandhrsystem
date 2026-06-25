@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>I-BG Group — HR & Payroll System</title>
-<link rel="icon" href="/ibg-logo.png" type="image/png">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js" as="script">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>I-BG Group — HR &amp; Payroll System</title>
+<link href="/ibg-logo.png" rel="icon" type="image/png"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link as="script" href="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js" rel="preload"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',sans-serif;background:#fdf3f6;color:#2d1a25;font-size:14px}
@@ -163,1976 +164,342 @@ tr:hover td{background:var(--blush2)}
 </style>
 </head>
 <body>
-
 <!-- ═══ LOGIN SCREEN ═══ -->
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="login-logo">
-      <img src="https://static.wixstatic.com/media/d68c50_dce12461e86b49768f9f0d42beb9a084~mv2.png" onerror="this.style.display='none'">
-      <div class="login-logo-text">
-        <h1>I-BG Group</h1>
-        <p>HR & Payroll System</p>
-      </div>
-    </div>
-    <div class="login-tab-group">
-      <div class="login-tab active" id="tabSignIn" onclick="switchTab('in')">Sign In</div>
-      <div class="login-tab" id="tabSignUp" onclick="switchTab('up')">Sign Up</div>
-    </div>
-    <div id="loginErr" class="login-err"></div>
-    <div class="login-form">
-      <div class="login-field">
-        <label>Company Email</label>
-        <input type="email" id="loginEmail" placeholder="you@ibgctasia.com">
-      </div>
-      <div class="login-field">
-        <label>Password</label>
-        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAuth()">
-      </div>
-      <div id="signUpFields" style="display:none">
-        <div class="login-field">
-          <label>Confirm Password</label>
-          <input type="password" id="loginPass2" placeholder="••••••••">
-        </div>
-      </div>
-      <button class="btn-login" onclick="doAuth()" id="authBtn" disabled style="opacity:.6;cursor:not-allowed">Sign In →</button>
-    </div>
-    <div id="appInitMsg" style="text-align:center;font-size:12px;color:var(--rose);margin-top:8px">⏳ Connecting…</div>
-    <div class="login-info">
-      🔒 Employees: sign up with your company email.<br>
+<div class="login-card">
+<div class="login-logo">
+<img onerror="this.style.display='none'" src="https://static.wixstatic.com/media/d68c50_dce12461e86b49768f9f0d42beb9a084~mv2.png"/>
+<div class="login-logo-text">
+<h1>I-BG Group</h1>
+<p>HR &amp; Payroll System</p>
+</div>
+</div>
+<div class="login-tab-group">
+<div class="login-tab active" id="tabSignIn">Sign In</div>
+<div class="login-tab" id="tabSignUp">Sign Up</div>
+</div>
+<div class="login-err" id="loginErr"></div>
+<div class="login-form">
+<div class="login-field">
+<label>Company Email</label>
+<input id="loginEmail" placeholder="you@ibgctasia.com" type="email"/>
+</div>
+<div class="login-field">
+<label>Password</label>
+<input id="loginPass" placeholder="••••••••" type="password"/>
+</div>
+<div id="signUpFields" style="display:none">
+<div class="login-field">
+<label>Confirm Password</label>
+<input id="loginPass2" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<button class="btn-login" disabled="" id="authBtn" style="opacity:.6;cursor:not-allowed">Sign In →</button>
+</div>
+<div id="appInitMsg" style="text-align:center;font-size:12px;color:var(--rose);margin-top:8px">⏳ Connecting…</div>
+<div class="login-info">
+      🔒 Employees: sign up with your company email.<br/>
       Admin will activate your account.
     </div>
-  </div>
 </div>
-
+</div>
 <!-- ═══ BIOMETRIC AUTH SCREEN ═══ -->
 <div id="bioAuthScreen" style="display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#3d0e1c 0%,var(--maroon) 50%,#9e2a4c 100%);position:relative;overflow:hidden">
-  <div class="login-card" style="text-align:center">
-    <div style="font-size:56px;margin-bottom:12px">🔐</div>
-    <h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Biometric Verification</h2>
-    <p style="color:#9a7f87;font-size:13px;margin-bottom:24px">Use your fingerprint or Face ID to verify your identity.</p>
-    <div id="bioAuthErr" class="login-err" style="display:none"></div>
-    <button class="btn-login" onclick="doAuthBiometric()" id="bioAuthBtn">Verify with Biometric →</button>
-    <div style="margin-top:14px;font-size:12px;color:#9a7f87">
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="backFromBioAuth()">← Back</span>
-      &nbsp;·&nbsp;
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="skipBioAuth()">Use email code instead</span>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:#c9b4ba">Your biometric data never leaves your device.</div>
-  </div>
+<div class="login-card" style="text-align:center">
+<div style="font-size:56px;margin-bottom:12px">🔐</div>
+<h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Biometric Verification</h2>
+<p style="color:#9a7f87;font-size:13px;margin-bottom:24px">Use your fingerprint or Face ID to verify your identity.</p>
+<div class="login-err" id="bioAuthErr" style="display:none"></div>
+<button class="btn-login" id="bioAuthBtn">Verify with Biometric →</button>
+<div style="margin-top:14px;font-size:12px;color:#9a7f87">
+<span id="_ev_1" style="color:var(--maroon);cursor:pointer;font-weight:600">← Back</span>
+       · 
+      <span id="_ev_2" style="color:var(--maroon);cursor:pointer;font-weight:600">Use email code instead</span>
 </div>
-
+<div style="margin-top:10px;font-size:11px;color:#c9b4ba">Your biometric data never leaves your device.</div>
+</div>
+</div>
 <!-- ═══ BIOMETRIC REGISTER SCREEN ═══ -->
 <div id="bioRegisterScreen" style="display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#3d0e1c 0%,var(--maroon) 50%,#9e2a4c 100%);position:relative;overflow:hidden">
-  <div class="login-card" style="text-align:center">
-    <div style="font-size:56px;margin-bottom:12px">👆</div>
-    <h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Set Up Biometric Login</h2>
-    <p style="color:#9a7f87;font-size:13px;margin-bottom:24px">Register your fingerprint or Face ID for faster, more secure logins on this device. One-time setup.</p>
-    <div id="bioRegErr" class="login-err" style="display:none"></div>
-    <button class="btn-login" onclick="doRegisterBiometric()">Set Up Now →</button>
-    <div style="margin-top:14px;font-size:12px;color:#9a7f87">
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="backFromBioReg()">← Back</span>
-      &nbsp;·&nbsp;
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="skipBioRegister()">Skip, use email code instead</span>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:#c9b4ba">Your biometric data stays on your device — we only store a key ID.</div>
-  </div>
+<div class="login-card" style="text-align:center">
+<div style="font-size:56px;margin-bottom:12px">👆</div>
+<h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Set Up Biometric Login</h2>
+<p style="color:#9a7f87;font-size:13px;margin-bottom:24px">Register your fingerprint or Face ID for faster, more secure logins on this device. One-time setup.</p>
+<div class="login-err" id="bioRegErr" style="display:none"></div>
+<button class="btn-login" id="_ev_3">Set Up Now →</button>
+<div style="margin-top:14px;font-size:12px;color:#9a7f87">
+<span id="_ev_4" style="color:var(--maroon);cursor:pointer;font-weight:600">← Back</span>
+       · 
+      <span id="_ev_5" style="color:var(--maroon);cursor:pointer;font-weight:600">Skip, use email code instead</span>
 </div>
-
+<div style="margin-top:10px;font-size:11px;color:#c9b4ba">Your biometric data stays on your device — we only store a key ID.</div>
+</div>
+</div>
 <!-- ═══ EMAIL OTP SCREEN ═══ -->
 <div id="otpScreen" style="display:none;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#3d0e1c 0%,var(--maroon) 50%,#9e2a4c 100%);position:relative;overflow:hidden">
-  <div class="login-card" style="text-align:center">
-    <div style="font-size:48px;margin-bottom:12px">📧</div>
-    <h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Check Your Email</h2>
-    <p id="otpSubtext" style="color:#9a7f87;font-size:13px;margin-bottom:24px">We sent a 6-digit code to your email. Enter it below.</p>
-    <div id="otpErr" class="login-err" style="display:none"></div>
-    <div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px">
-      <input id="o1" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,'o2')" onkeydown="otpBack(event,this,'')">
-      <input id="o2" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,'o3')" onkeydown="otpBack(event,this,'o1')">
-      <input id="o3" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,'o4')" onkeydown="otpBack(event,this,'o2')">
-      <input id="o4" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,'o5')" onkeydown="otpBack(event,this,'o3')">
-      <input id="o5" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,'o6')" onkeydown="otpBack(event,this,'o4')">
-      <input id="o6" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" oninput="otpNext(this,null)" onkeydown="otpBack(event,this,'o5')" onkeyup="if(this.value)doVerifyOtp()">
-    </div>
-    <button class="btn-login" onclick="doVerifyOtp()">Verify →</button>
-    <div style="margin-top:14px;font-size:12px;color:#9a7f87">
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="backFromOtp()">← Back to Login</span>
-      &nbsp;·&nbsp;
-      <span style="color:var(--maroon);cursor:pointer;font-weight:600" onclick="resendOtp()">Resend Code</span>
-    </div>
-    <div style="margin-top:10px;font-size:11px;color:#c9b4ba">Code expires in 10 minutes. Check your spam folder if needed.</div>
-  </div>
+<div class="login-card" style="text-align:center">
+<div style="font-size:48px;margin-bottom:12px">📧</div>
+<h2 style="color:var(--maroon);font-family:'Playfair Display',serif;margin-bottom:6px">Check Your Email</h2>
+<p id="otpSubtext" style="color:#9a7f87;font-size:13px;margin-bottom:24px">We sent a 6-digit code to your email. Enter it below.</p>
+<div class="login-err" id="otpErr" style="display:none"></div>
+<div style="display:flex;gap:8px;justify-content:center;margin-bottom:20px">
+<input id="o1" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
+<input id="o2" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
+<input id="o3" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
+<input id="o4" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
+<input id="o5" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
+<input id="o6" inputmode="numeric" maxlength="1" pattern="[0-9]" style="width:44px;height:52px;text-align:center;font-size:22px;font-weight:700;border:2px solid var(--border);border-radius:10px;outline:none;color:var(--maroon)" type="text"/>
 </div>
-
+<button class="btn-login" id="_ev_6">Verify →</button>
+<div style="margin-top:14px;font-size:12px;color:#9a7f87">
+<span id="_ev_7" style="color:var(--maroon);cursor:pointer;font-weight:600">← Back to Login</span>
+       · 
+      <span id="_ev_8" style="color:var(--maroon);cursor:pointer;font-weight:600">Resend Code</span>
+</div>
+<div style="margin-top:10px;font-size:11px;color:#c9b4ba">Code expires in 10 minutes. Check your spam folder if needed.</div>
+</div>
+</div>
 <!-- ═══ LOADING ═══ -->
 <div id="loadingOverlay"><div class="spinner"></div></div>
-
 <!-- ═══ TOAST ═══ -->
 <div id="toastContainer"></div>
-
 <!-- ═══ APP ═══ -->
 <div id="app" style="display:none">
-
-  <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div class="sb-logo">
-      <img src="https://static.wixstatic.com/media/d68c50_dce12461e86b49768f9f0d42beb9a084~mv2.png" onerror="this.style.display='none'">
-      <div class="sb-logo-text">
-        <h2>I-BG Group</h2>
-        <p>HR & Payroll</p>
-      </div>
-    </div>
-    <nav class="sb-nav" id="sidebarNav"></nav>
-    <div class="sb-footer" onclick="doLogout()">🚪 Sign Out</div>
-  </div>
-
-  <!-- MAIN -->
-  <div id="main">
-    <div id="topbar">
-      <div class="tb-title" id="pageTitle">Dashboard</div>
-      <div class="tb-right">
-        <input type="month" id="globalMonth" class="tb-month" onchange="refreshPage()">
-        <div class="tb-user">
-          <div class="avatar" id="userAvatar">--</div>
-          <div>
-            <div id="userName">Loading...</div>
-            <div class="tb-role" id="userRole">—</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div id="content"></div>
-  </div>
+<!-- SIDEBAR -->
+<div id="sidebar">
+<div class="sb-logo">
+<img onerror="this.style.display='none'" src="https://static.wixstatic.com/media/d68c50_dce12461e86b49768f9f0d42beb9a084~mv2.png"/>
+<div class="sb-logo-text">
+<h2>I-BG Group</h2>
+<p>HR &amp; Payroll</p>
 </div>
-
+</div>
+<nav class="sb-nav" id="sidebarNav"></nav>
+<div class="sb-footer" id="_ev_9">🚪 Sign Out</div>
+</div>
+<!-- MAIN -->
+<div id="main">
+<div id="topbar">
+<div class="tb-title" id="pageTitle">Dashboard</div>
+<div class="tb-right">
+<input class="tb-month" id="globalMonth" type="month"/>
+<div class="tb-user">
+<div class="avatar" id="userAvatar">--</div>
+<div>
+<div id="userName">Loading...</div>
+<div class="tb-role" id="userRole">—</div>
+</div>
+</div>
+</div>
+</div>
+<div id="content"></div>
+</div>
+</div>
 <!-- ═══ MODALS ═══ -->
-
 <!-- Employee Modal -->
 <div class="modal-overlay" id="empModal">
-  <div class="modal">
-    <div class="modal-header"><h3 id="empModalTitle">Add Employee</h3><button class="modal-close" onclick="closeModal('empModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group span-2"><label>Company</label><select id="f_company">
-          <option value="I-BG Consultancy &amp; Trading (S) Pte Ltd">I-BG Consultancy &amp; Trading (S) Pte Ltd</option>
-          <option value="I-BG Trading and Consultancy Corporation">I-BG Trading and Consultancy Corporation</option>
-        </select></div>
-        <div class="form-group"><label>Employee ID</label><input id="f_id" placeholder="IBG-0001"></div>
-        <div class="form-group"><label>Full Name (Last, First M.)</label><input id="f_name" placeholder="Dela Cruz, Juan M."></div>
-        <div class="form-group"><label>Position</label><input id="f_pos"></div>
-        <div class="form-group"><label>Department</label><input id="f_dept"></div>
-        <div class="form-group"><label>Employment Type</label><select id="f_type"><option>Regular</option><option>Probationary</option><option>Contractual</option><option>Part-time</option></select></div>
-        <div class="form-group"><label>Date Hired</label><input type="date" id="f_hired"></div>
-        <div class="form-group"><label>Basic Salary (PHP)</label><input type="number" id="f_sal" placeholder="0"></div>
-        <div class="form-group"><label>Rice Subsidy</label><input type="number" id="f_rice" value="2000"></div>
-        <div class="form-group"><label>Transportation</label><input type="number" id="f_trans" value="0"></div>
-        <div class="form-group"><label>Phone / Load</label><input type="number" id="f_phone" value="0"></div>
-        <div class="form-group"><label>Other Allowance</label><input type="number" id="f_other" value="0"></div>
-        <div class="form-group"><label>Company Email</label><input type="email" id="f_email" placeholder="employee@ibgctasia.com"></div>
-        <div class="form-group"><label>SSS Number</label><input id="f_sss"></div>
-        <div class="form-group"><label>PhilHealth Number</label><input id="f_phic"></div>
-        <div class="form-group"><label>Pag-IBIG Number</label><input id="f_hdmf"></div>
-        <div class="form-group"><label>TIN</label><input id="f_tin"></div>
-        <div class="form-group"><label>Contact Number</label><input id="f_contact"></div>
-        <div class="form-group span-2"><label>Address</label><input id="f_address"></div>
-        <div class="form-group"><label>Role</label><select id="f_role"><option value="employee">Employee</option><option value="admin">Admin</option></select></div>
-        <div class="form-group"><label>Status</label><select id="f_status"><option>Active</option><option>Inactive</option><option>Resigned</option><option>Terminated</option></select></div>
-        <div class="form-group span-2" style="margin-top:10px;padding-top:12px;border-top:1px solid var(--border)"><label style="color:var(--maroon);font-size:13px;font-weight:700">💳 Payment Details</label></div>
-        <div class="form-group span-2">
-          <label>Payment Channel</label>
-          <select id="f_payment_channel" onchange="togglePaymentFields()">
-            <option value="bank">Bank Transfer (via Wise)</option>
-            <option value="gcash">GCash</option>
-            <option value="maya">Maya</option>
-            <option value="gotyme">GoTyme</option>
-            <option value="unionbank_online">UnionBank Online</option>
-            <option value="cash">Cash / Manual</option>
-          </select>
-        </div>
-        <div id="bank_fields_group" class="form-group" style="display:contents">
-          <div class="form-group"><label>Bank Name</label><select id="f_bank_name"><option value="">-- Select Bank --</option><option value="BDO">BDO</option><option value="BPI">BPI</option><option value="METROBANK">Metrobank</option><option value="UNIONBANK">UnionBank</option><option value="LANDBANK">Land Bank</option><option value="PNB">PNB</option><option value="RCBC">RCBC</option><option value="CHINABANK">China Bank</option><option value="SECURITYBANK">Security Bank</option><option value="EASTWEST">EastWest Bank</option></select></div>
-          <div class="form-group"><label id="f_account_label">Account Number</label><input id="f_bank_account_number" placeholder="e.g. 1234567890"></div>
-          <div class="form-group span-2"><label>Account Name (as in bank)</label><input id="f_bank_account_name" placeholder="Last Name, First Name Middle Name"></div>
-        </div>
-        <div id="ewallet_fields_group" style="display:none;contents:unset" class="form-group span-2">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;grid-column:span 2">
-            <div class="form-group"><label id="f_mobile_label">Mobile Number</label><input id="f_mobile_number" placeholder="e.g. 09171234567"></div>
-            <div class="form-group"><label>Account Name</label><input id="f_bank_account_name_ewallet" placeholder="Full name as registered"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('empModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveEmployee()">💾 Save Employee</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-header"><h3 id="empModalTitle">Add Employee</h3><button class="modal-close" id="_ev_10">✕</button></div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group span-2"><label>Company</label><select id="f_company">
+<option value="I-BG Consultancy &amp; Trading (S) Pte Ltd">I-BG Consultancy &amp; Trading (S) Pte Ltd</option>
+<option value="I-BG Trading and Consultancy Corporation">I-BG Trading and Consultancy Corporation</option>
+</select></div>
+<div class="form-group"><label>Employee ID</label><input id="f_id" placeholder="IBG-0001"/></div>
+<div class="form-group"><label>Full Name (Last, First M.)</label><input id="f_name" placeholder="Dela Cruz, Juan M."/></div>
+<div class="form-group"><label>Position</label><input id="f_pos"/></div>
+<div class="form-group"><label>Department</label><input id="f_dept"/></div>
+<div class="form-group"><label>Employment Type</label><select id="f_type"><option>Regular</option><option>Probationary</option><option>Contractual</option><option>Part-time</option></select></div>
+<div class="form-group"><label>Date Hired</label><input id="f_hired" type="date"/></div>
+<div class="form-group"><label>Basic Salary (PHP)</label><input id="f_sal" placeholder="0" type="number"/></div>
+<div class="form-group"><label>Rice Subsidy</label><input id="f_rice" type="number" value="2000"/></div>
+<div class="form-group"><label>Transportation</label><input id="f_trans" type="number" value="0"/></div>
+<div class="form-group"><label>Phone / Load</label><input id="f_phone" type="number" value="0"/></div>
+<div class="form-group"><label>Other Allowance</label><input id="f_other" type="number" value="0"/></div>
+<div class="form-group"><label>Company Email</label><input id="f_email" placeholder="employee@ibgctasia.com" type="email"/></div>
+<div class="form-group"><label>SSS Number</label><input id="f_sss"/></div>
+<div class="form-group"><label>PhilHealth Number</label><input id="f_phic"/></div>
+<div class="form-group"><label>Pag-IBIG Number</label><input id="f_hdmf"/></div>
+<div class="form-group"><label>TIN</label><input id="f_tin"/></div>
+<div class="form-group"><label>Contact Number</label><input id="f_contact"/></div>
+<div class="form-group span-2"><label>Address</label><input id="f_address"/></div>
+<div class="form-group"><label>Role</label><select id="f_role"><option value="employee">Employee</option><option value="admin">Admin</option></select></div>
+<div class="form-group"><label>Status</label><select id="f_status"><option>Active</option><option>Inactive</option><option>Resigned</option><option>Terminated</option></select></div>
+<div class="form-group span-2" style="margin-top:10px;padding-top:12px;border-top:1px solid var(--border)"><label style="color:var(--maroon);font-size:13px;font-weight:700">💳 Payment Details</label></div>
+<div class="form-group span-2">
+<label>Payment Channel</label>
+<select id="f_payment_channel">
+<option value="bank">Bank Transfer (via Wise)</option>
+<option value="gcash">GCash</option>
+<option value="maya">Maya</option>
+<option value="gotyme">GoTyme</option>
+<option value="unionbank_online">UnionBank Online</option>
+<option value="cash">Cash / Manual</option>
+</select>
 </div>
-
+<div class="form-group" id="bank_fields_group" style="display:contents">
+<div class="form-group"><label>Bank Name</label><select id="f_bank_name"><option value="">-- Select Bank --</option><option value="BDO">BDO</option><option value="BPI">BPI</option><option value="METROBANK">Metrobank</option><option value="UNIONBANK">UnionBank</option><option value="LANDBANK">Land Bank</option><option value="PNB">PNB</option><option value="RCBC">RCBC</option><option value="CHINABANK">China Bank</option><option value="SECURITYBANK">Security Bank</option><option value="EASTWEST">EastWest Bank</option></select></div>
+<div class="form-group"><label id="f_account_label">Account Number</label><input id="f_bank_account_number" placeholder="e.g. 1234567890"/></div>
+<div class="form-group span-2"><label>Account Name (as in bank)</label><input id="f_bank_account_name" placeholder="Last Name, First Name Middle Name"/></div>
+</div>
+<div class="form-group span-2" id="ewallet_fields_group" style="display:none;contents:unset">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;grid-column:span 2">
+<div class="form-group"><label id="f_mobile_label">Mobile Number</label><input id="f_mobile_number" placeholder="e.g. 09171234567"/></div>
+<div class="form-group"><label>Account Name</label><input id="f_bank_account_name_ewallet" placeholder="Full name as registered"/></div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_11">Cancel</button>
+<button class="btn btn-primary" id="_ev_12">💾 Save Employee</button>
+</div>
+</div>
+</div>
 <!-- Attendance Modal -->
 <div class="modal-overlay" id="attModal">
-  <div class="modal">
-    <div class="modal-header"><h3>Log Attendance</h3><button class="modal-close" onclick="closeModal('attModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group"><label>Employee</label><select id="a_emp"></select></div>
-        <div class="form-group"><label>Date</label><input type="date" id="a_date"></div>
-        <div class="form-group"><label>Time In</label><input type="time" id="a_in" value="08:00"></div>
-        <div class="form-group"><label>Time Out</label><input type="time" id="a_out" value="17:00"></div>
-        <div class="form-group"><label>Status</label><select id="a_status"><option>Present</option><option>Late</option><option>Half Day</option><option>Absent</option><option>Holiday</option><option>Rest Day Work</option></select></div>
-        <div class="form-group"><label>Overtime Hours</label><input type="number" id="a_ot" value="0" min="0" max="8" step="0.5"></div>
-        <div class="form-group span-2"><label>Remarks</label><input id="a_remarks" placeholder="Optional"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('attModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveAttendance()">Save Record</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-header"><h3>Log Attendance</h3><button class="modal-close" id="_ev_13">✕</button></div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group"><label>Employee</label><select id="a_emp"></select></div>
+<div class="form-group"><label>Date</label><input id="a_date" type="date"/></div>
+<div class="form-group"><label>Time In</label><input id="a_in" type="time" value="08:00"/></div>
+<div class="form-group"><label>Time Out</label><input id="a_out" type="time" value="17:00"/></div>
+<div class="form-group"><label>Status</label><select id="a_status"><option>Present</option><option>Late</option><option>Half Day</option><option>Absent</option><option>Holiday</option><option>Rest Day Work</option></select></div>
+<div class="form-group"><label>Overtime Hours</label><input id="a_ot" max="8" min="0" step="0.5" type="number" value="0"/></div>
+<div class="form-group span-2"><label>Remarks</label><input id="a_remarks" placeholder="Optional"/></div>
 </div>
-
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_14">Cancel</button>
+<button class="btn btn-primary" id="_ev_15">Save Record</button>
+</div>
+</div>
+</div>
 <!-- Leave Modal -->
 <div class="modal-overlay" id="leaveModal">
-  <div class="modal">
-    <div class="modal-header"><h3>File a Leave</h3><button class="modal-close" onclick="closeModal('leaveModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group"><label>Employee</label><select id="l_emp"></select></div>
-        <div class="form-group"><label>Leave Type</label><select id="l_type" onchange="onLeaveTypeChange()">
-          <optgroup label="🏢 Company Leaves">
-            <option>Annual Leave</option>
-            <option>Sick Leave</option>
-            <option>Compassionate Leave</option>
-            <option>Holiday in Lieu</option>
-            <option>Off in Lieu</option>
-          </optgroup>
-          <optgroup label="🇵🇭 Statutory Leaves">
-            <option>Service Incentive Leave (SIL)</option>
-            <option>Maternity Leave</option>
-            <option>Paternity Leave</option>
-            <option>Solo Parent Leave</option>
-            <option>Special Leave for Women</option>
-            <option>VAWC Leave</option>
-            <option>Special Emergency Leave</option>
-          </optgroup>
-          <optgroup label="⚠️ Other">
-            <option value="LWOP (Without Pay)">LWOP (Without Pay)</option>
-          </optgroup>
-        </select></div>
-        <div class="form-group"><label>Date From</label><input type="date" id="l_from"></div>
-        <div class="form-group"><label>Date To</label><input type="date" id="l_to"></div>
-        <div class="form-group span-2"><label>Reason / Notes</label><textarea id="l_reason" rows="2" placeholder="Brief description"></textarea></div>
-        <div class="form-group"><label>Pay Status</label><select id="l_pay"><option value="1">With Pay</option><option value="0">Without Pay (LWOP)</option></select></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('leaveModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveLeave()">Submit Leave</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-header"><h3>File a Leave</h3><button class="modal-close" id="_ev_16">✕</button></div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group"><label>Employee</label><select id="l_emp"></select></div>
+<div class="form-group"><label>Leave Type</label><select id="l_type">
+<optgroup label="🏢 Company Leaves">
+<option>Annual Leave</option>
+<option>Sick Leave</option>
+<option>Compassionate Leave</option>
+<option>Holiday in Lieu</option>
+<option>Off in Lieu</option>
+</optgroup>
+<optgroup label="🇵🇭 Statutory Leaves">
+<option>Service Incentive Leave (SIL)</option>
+<option>Maternity Leave</option>
+<option>Paternity Leave</option>
+<option>Solo Parent Leave</option>
+<option>Special Leave for Women</option>
+<option>VAWC Leave</option>
+<option>Special Emergency Leave</option>
+</optgroup>
+<optgroup label="⚠️ Other">
+<option value="LWOP (Without Pay)">LWOP (Without Pay)</option>
+</optgroup>
+</select></div>
+<div class="form-group"><label>Date From</label><input id="l_from" type="date"/></div>
+<div class="form-group"><label>Date To</label><input id="l_to" type="date"/></div>
+<div class="form-group span-2"><label>Reason / Notes</label><textarea id="l_reason" placeholder="Brief description" rows="2"></textarea></div>
+<div class="form-group"><label>Pay Status</label><select id="l_pay"><option value="1">With Pay</option><option value="0">Without Pay (LWOP)</option></select></div>
 </div>
-
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_17">Cancel</button>
+<button class="btn btn-primary" id="_ev_18">Submit Leave</button>
+</div>
+</div>
+</div>
 <!-- Claim Modal -->
 <div class="modal-overlay" id="claimModal">
-  <div class="modal">
-    <div class="modal-header"><h3>File an Expense Claim</h3><button class="modal-close" onclick="closeModal('claimModal')">✕</button></div>
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group"><label>Employee</label><select id="c_emp"></select></div>
-        <div class="form-group"><label>Date of Expense</label><input type="date" id="c_date"></div>
-        <div class="form-group"><label>Category</label><select id="c_cat">
-          <option>Transportation</option><option>Meal / Entertainment</option><option>Communication</option>
-          <option>Supplies / Materials</option><option>Lodging / Accommodation</option>
-          <option>Medical</option><option>Training / Seminar</option><option>Client Representation</option><option>Other</option>
-        </select></div>
-        <div class="form-group"><label>Amount (PHP)</label>
-          <div class="input-group"><span class="input-prefix">₱</span><input id="c_amount" type="number" placeholder="0.00"></div>
-        </div>
-        <div class="form-group span-2"><label>Description / Business Purpose</label><textarea id="c_desc" rows="2"></textarea></div>
-        <div class="form-group span-2">
-          <label>Receipt / Proof Document <span style="color:#9a7f87;font-weight:400">(optional — JPG, PNG, PDF, max 5MB)</span></label>
-          <input type="file" id="c_receipt_file" accept=".jpg,.jpeg,.png,.pdf,.webp" style="border:1px dashed #c9a0ae;border-radius:8px;padding:8px;width:100%;cursor:pointer;background:#fdf6f8">
-          <div id="c_receipt_status" style="font-size:12px;color:#9a7f87;margin-top:4px"></div>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('claimModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveClaim()">Submit Claim</button>
-    </div>
-  </div>
+<div class="modal">
+<div class="modal-header"><h3>File an Expense Claim</h3><button class="modal-close" id="_ev_19">✕</button></div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group"><label>Employee</label><select id="c_emp"></select></div>
+<div class="form-group"><label>Date of Expense</label><input id="c_date" type="date"/></div>
+<div class="form-group"><label>Category</label><select id="c_cat">
+<option>Transportation</option><option>Meal / Entertainment</option><option>Communication</option>
+<option>Supplies / Materials</option><option>Lodging / Accommodation</option>
+<option>Medical</option><option>Training / Seminar</option><option>Client Representation</option><option>Other</option>
+</select></div>
+<div class="form-group"><label>Amount (PHP)</label>
+<div class="input-group"><span class="input-prefix">₱</span><input id="c_amount" placeholder="0.00" type="number"/></div>
 </div>
-
+<div class="form-group span-2"><label>Description / Business Purpose</label><textarea id="c_desc" rows="2"></textarea></div>
+<div class="form-group span-2">
+<label>Receipt / Proof Document <span style="color:#9a7f87;font-weight:400">(optional — JPG, PNG, PDF, max 5MB)</span></label>
+<input accept=".jpg,.jpeg,.png,.pdf,.webp" id="c_receipt_file" style="border:1px dashed #c9a0ae;border-radius:8px;padding:8px;width:100%;cursor:pointer;background:#fdf6f8" type="file"/>
+<div id="c_receipt_status" style="font-size:12px;color:#9a7f87;margin-top:4px"></div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_20">Cancel</button>
+<button class="btn btn-primary" id="_ev_21">Submit Claim</button>
+</div>
+</div>
+</div>
 <!-- Edit Payroll Modal -->
 <div class="modal-overlay" id="editPayrollModal">
-  <div class="modal" style="width:620px">
-    <div class="modal-header">
-      <div>
-        <h3>Edit Payroll Entry</h3>
-        <div style="font-size:13px;color:#9a7f87;margin-top:2px"><span id="ep_empname"></span> — <span id="ep_month"></span></div>
-      </div>
-      <button class="modal-close" onclick="closeModal('editPayrollModal')">✕</button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="ep_id">
-      <div style="background:#fff3cd;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:16px">⚠️ Editing will override the computed values. Use only to correct encoding errors.</div>
-      <div style="font-size:12px;color:#9a7f87;margin-bottom:6px">Basic Salary (reference only)</div>
-      <input id="ep_salary" type="number" readonly style="background:#f9f0f3;border:1px solid var(--border);border-radius:6px;padding:6px 10px;width:100%;margin-bottom:14px;color:#9a7f87">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Gross Pay</label><input id="ep_grosspay" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Allowances</label><input id="ep_allowances" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>SSS <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_sss" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>SSS <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_sss_er" type="number" step="0.01" style="background:#f0faf3;border-color:#c3e6cb"></div>
-        <div class="form-group"><label>PhilHealth <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_phic" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>PhilHealth <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_phic_er" type="number" step="0.01" style="background:#f0faf3;border-color:#c3e6cb"></div>
-        <div class="form-group"><label>Pag-IBIG <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_hdmf" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Pag-IBIG <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_hdmf_er" type="number" step="0.01" style="background:#f0faf3;border-color:#c3e6cb"></div>
-        <div class="form-group"><label>Withholding Tax</label><input id="ep_tax" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Absent Deduction</label><input id="ep_absentded" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Late Deduction</label><input id="ep_lateded" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Half Day Deduction</label><input id="ep_halfded" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-        <div class="form-group"><label>Approved Claims (+)</label><input id="ep_claims" type="number" step="0.01" oninput="calcEditNetPay()"></div>
-      </div>
-      <div style="margin-top:16px;padding:14px 18px;background:#fdf3f6;border-radius:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #f0dde4">
-        <span style="font-weight:700;color:#7a1c3a">Computed Net Pay</span>
-        <span id="ep_netpay_preview" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7a1c3a">₱0.00</span>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('editPayrollModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="savePayrollEdit()">💾 Save Changes</button>
-    </div>
-  </div>
+<div class="modal" style="width:620px">
+<div class="modal-header">
+<div>
+<h3>Edit Payroll Entry</h3>
+<div style="font-size:13px;color:#9a7f87;margin-top:2px"><span id="ep_empname"></span> — <span id="ep_month"></span></div>
 </div>
-
+<button class="modal-close" id="_ev_22">✕</button>
+</div>
+<div class="modal-body">
+<input id="ep_id" type="hidden"/>
+<div style="background:#fff3cd;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:16px">⚠️ Editing will override the computed values. Use only to correct encoding errors.</div>
+<div style="font-size:12px;color:#9a7f87;margin-bottom:6px">Basic Salary (reference only)</div>
+<input id="ep_salary" readonly="" style="background:#f9f0f3;border:1px solid var(--border);border-radius:6px;padding:6px 10px;width:100%;margin-bottom:14px;color:#9a7f87" type="number"/>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+<div class="form-group"><label>Gross Pay</label><input id="ep_grosspay" step="0.01" type="number"/></div>
+<div class="form-group"><label>Allowances</label><input id="ep_allowances" step="0.01" type="number"/></div>
+<div class="form-group"><label>SSS <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_sss" step="0.01" type="number"/></div>
+<div class="form-group"><label>SSS <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_sss_er" step="0.01" style="background:#f0faf3;border-color:#c3e6cb" type="number"/></div>
+<div class="form-group"><label>PhilHealth <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_phic" step="0.01" type="number"/></div>
+<div class="form-group"><label>PhilHealth <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_phic_er" step="0.01" style="background:#f0faf3;border-color:#c3e6cb" type="number"/></div>
+<div class="form-group"><label>Pag-IBIG <span style="font-size:10px;color:#9a7f87">(Employee)</span></label><input id="ep_hdmf" step="0.01" type="number"/></div>
+<div class="form-group"><label>Pag-IBIG <span style="font-size:10px;color:#28a745">Employer</span></label><input id="ep_hdmf_er" step="0.01" style="background:#f0faf3;border-color:#c3e6cb" type="number"/></div>
+<div class="form-group"><label>Withholding Tax</label><input id="ep_tax" step="0.01" type="number"/></div>
+<div class="form-group"><label>Absent Deduction</label><input id="ep_absentded" step="0.01" type="number"/></div>
+<div class="form-group"><label>Late Deduction</label><input id="ep_lateded" step="0.01" type="number"/></div>
+<div class="form-group"><label>Half Day Deduction</label><input id="ep_halfded" step="0.01" type="number"/></div>
+<div class="form-group"><label>Approved Claims (+)</label><input id="ep_claims" step="0.01" type="number"/></div>
+</div>
+<div style="margin-top:16px;padding:14px 18px;background:#fdf3f6;border-radius:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #f0dde4">
+<span style="font-weight:700;color:#7a1c3a">Computed Net Pay</span>
+<span id="ep_netpay_preview" style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7a1c3a">₱0.00</span>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_23">Cancel</button>
+<button class="btn btn-primary" id="_ev_24">💾 Save Changes</button>
+</div>
+</div>
+</div>
 <!-- Payslip Modal -->
 <div class="modal-overlay" id="payslipModal">
-  <div class="modal" style="width:700px">
-    <div class="modal-header"><h3>Payslip</h3><button class="modal-close" onclick="closeModal('payslipModal')">✕</button></div>
-    <div class="modal-body" id="payslipContent" style="padding:0"></div>
-    <div class="modal-footer no-print">
-      <button class="btn btn-ghost" onclick="closeModal('payslipModal')">Close</button>
-      <button class="btn btn-primary" onclick="window.print()">🖨️ Print</button>
-    </div>
-  </div>
+<div class="modal" style="width:700px">
+<div class="modal-header"><h3>Payslip</h3><button class="modal-close" id="_ev_25">✕</button></div>
+<div class="modal-body" id="payslipContent" style="padding:0"></div>
+<div class="modal-footer no-print">
+<button class="btn btn-ghost" id="_ev_26">Close</button>
+<button class="btn btn-primary" id="_ev_27">🖨️ Print</button>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js" integrity="sha384-cztVf4nptt4arwI8Ixfn8naubPgxH22BSvA0CuqFUCulIT+dgnb18vSqiZbbPDL1" crossorigin="anonymous"></script>
-<script>
-// ── HTML escape helper ──────────────────────────
-function esc(s){
-  return String(s==null?'':s)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
-
-// ── Brute-force login protection ────────────────
-const _BF_MAX = 5;
-const _BF_MS  = 15 * 60 * 1000;
-function _bfGet(){ try{ return JSON.parse(sessionStorage.getItem('_lka')||'{}'); }catch{ return {}; } }
-function _bfFail(){
-  const d=_bfGet(); d.n=(d.n||0)+1;
-  if(d.n>=_BF_MAX) d.u=Date.now()+_BF_MS;
-  sessionStorage.setItem('_lka',JSON.stringify(d));
-}
-function _bfReset(){ sessionStorage.removeItem('_lka'); }
-function _bfMinsLeft(){
-  const d=_bfGet();
-  return (d.u&&Date.now()<d.u)?Math.ceil((d.u-Date.now())/60000):0;
-}
-
-// ═══════════════════════════════════════════════
-// SUPABASE CONFIG
-// ═══════════════════════════════════════════════
-const SUPABASE_URL = 'https://gxtyhkwpctupbcydfuud.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd4dHloa3dwY3R1cGJjeWRmdXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NTI3NzcsImV4cCI6MjA5NzMyODc3N30.4Neig57RZYHJo43u5SgAUPiz6G08B8hJRHIP4d8JTxk';
-// ─── MINIMAL SUPABASE CLIENT (replaces 500KB SDK) ───────────────────────────
-const sb = (function(){
-  let _sess = null;
-  const _ev = [];
-  const bH = {'apikey':SUPABASE_KEY,'Content-Type':'application/json'};
-  const aH = () => ({...bH,...(_sess?{'Authorization':'Bearer '+_sess.access_token}:{})});
-  const dH = () => ({...bH,'Authorization':'Bearer '+(_sess&&_sess.access_token||SUPABASE_KEY)});
-
-  async function gof(path, opts={}){
-    const r = await fetch(SUPABASE_URL+'/auth/v1'+path,{...opts,headers:{...bH,...(opts.headers||{})}});
-    const b = await r.json().catch(()=>({}));
-    return r.ok?{data:b,error:null}:{data:null,error:{message:b.msg||b.error_description||b.message||b.code||JSON.stringify(b)}};
-  }
-  async function pgf(path, opts={}){
-    const r = await fetch(SUPABASE_URL+'/rest/v1'+path,{...opts,headers:{...dH(),...(opts.headers||{})}});
-    if(r.status===204) return {data:null,error:null};
-    const b = await r.json().catch(()=>({}));
-    return r.ok?{data:b,error:null}:{data:null,error:{message:b.message||b.hint||b.code||JSON.stringify(b)}};
-  }
-
-  function qb(tbl){
-    let _sel='*',_fil=[],_ord=null;
-    const qs=()=>{let s='select='+_sel;_fil.forEach(f=>s+='&'+f);if(_ord)s+='&order='+_ord;return s;};
-    const o={
-      select(c){_sel=c;return o;},
-      eq(c,v){_fil.push(c+'=eq.'+encodeURIComponent(v));return o;},
-      is(c,v){_fil.push(c+'=is.'+v);return o;},
-      neq(c,v){_fil.push(c+'=neq.'+encodeURIComponent(v));return o;},
-      gte(c,v){_fil.push(c+'=gte.'+encodeURIComponent(v));return o;},
-      lte(c,v){_fil.push(c+'=lte.'+encodeURIComponent(v));return o;},
-      order(c,{ascending=true}={}){_ord=c+'.'+(ascending?'asc':'desc');return o;},
-      then(res,rej){return pgf('/'+tbl+'?'+qs()).then(res,rej);},
-      async maybeSingle(){
-        const r=await pgf('/'+tbl+'?'+qs(),{headers:{'Accept':'application/vnd.pgrst.object+json','Prefer':'missing=null'}});
-        if(!r.ok&&(r.error?.message?.includes('PGRST116')||r.error?.message?.includes('multiple')))return{data:null,error:null};
-        return r;
-      },
-      async single(){return pgf('/'+tbl+'?'+qs(),{headers:{Accept:'application/vnd.pgrst.object+json'}});},
-      update(body){return{eq(c,v){return pgf('/'+tbl+'?'+c+'=eq.'+encodeURIComponent(v),{method:'PATCH',body:JSON.stringify(body),headers:{'Prefer':'return=representation'}});},match(m){const f=Object.entries(m).map(([c,v])=>c+'=eq.'+encodeURIComponent(v)).join('&');return pgf('/'+tbl+'?'+f,{method:'PATCH',body:JSON.stringify(body),headers:{'Prefer':'return=representation'}});}};},
-      insert(body){
-        const go=(p='return=representation')=>pgf('/'+tbl,{method:'POST',body:JSON.stringify(body),headers:{'Prefer':p}});
-        return{select(){return{single:async()=>{const r=await go();return{data:Array.isArray(r.data)?r.data[0]:r.data,error:r.error};},then(res,rej){return go().then(res,rej);}};},then(res,rej){return go().then(res,rej);}};
-      },
-      upsert(body){
-        const go=()=>pgf('/'+tbl,{method:'POST',body:JSON.stringify(body),headers:{'Prefer':'resolution=merge-duplicates,return=representation'}});
-        return{select(){return{then(res,rej){return go().then(res,rej);}};},then(res,rej){return go().then(res,rej);}};
-      },
-      delete(){return{eq(c,v){return pgf('/'+tbl+'?'+c+'=eq.'+encodeURIComponent(v),{method:'DELETE',headers:{'Prefer':'return=minimal'}});}};},
-    };
-    return o;
-  }
-
-  return{
-    from:tbl=>qb(tbl),
-    rpc:(fn,p)=>pgf('/rpc/'+fn,{method:'POST',body:JSON.stringify(p)}),
-    auth:{
-      getSession:async()=>({data:{session:_sess},error:null}),
-      signInWithPassword:async({email,password})=>{
-        const r=await gof('/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
-        if(!r.error){_sess=r.data;_ev.forEach(cb=>cb('SIGNED_IN',_sess));}
-        return r.error?r:{data:{session:r.data,user:r.data?.user},error:null};
-      },
-      signUp:async({email,password})=>gof('/signup',{method:'POST',body:JSON.stringify({email,password})}),
-      signOut:async()=>{
-        if(_sess)await gof('/logout',{method:'POST',headers:{'Authorization':'Bearer '+_sess.access_token}}).catch(()=>{});
-        const was=_sess;_sess=null;
-        if(was)_ev.forEach(cb=>cb('SIGNED_OUT',null));
-        return{error:null};
-      },
-      onAuthStateChange:cb=>{_ev.push(cb);return{data:{subscription:{unsubscribe:()=>{const i=_ev.indexOf(cb);if(i>-1)_ev.splice(i,1);}}}};},
-      sendOtp:async(email)=>gof('/otp',{method:'POST',body:JSON.stringify({email,create_user:false})}),
-      verifyOtp:async(email,token)=>{
-        const r=await gof('/verify',{method:'POST',body:JSON.stringify({email,token,type:'email'})});
-        if(!r.error&&r.data){_sess=r.data;_ev.forEach(cb=>cb('SIGNED_IN',_sess));}
-        return r.error?r:{data:{session:r.data,user:r.data?.user},error:null};
-      }
-    }
-  };
-})();
-
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
-let currentUser = null;
-let currentEmployee = null;
-let currentRole = 'employee';
-let DB = { employees:[], attendance:[], leaves:[], claims:[], payroll:[] };
-let activeTab = 'in';
-
-// ═══════════════════════════════════════════════
-// AUTH — WEBAUTHN + EMAIL OTP FALLBACK
-// ═══════════════════════════════════════════════
-let pendingPasswordSession = null; // session from signInWithPassword
-let pendingBioEmail = '';          // email during bio flow
-let pendingCredentials = [];       // stored WebAuthn credential IDs for this user
-let pendingOtpEmail = '';          // email during OTP fallback flow
-
-// ── WebAuthn helpers ────────────────────────────
-function bufToB64url(buf){
-  return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
-}
-function b64urlToBuf(s){
-  const b=s.replace(/-/g,'+').replace(/_/g,'/');
-  const pad=b.length%4?'='.repeat(4-b.length%4):'';
-  return Uint8Array.from(atob(b+pad),c=>c.charCodeAt(0)).buffer;
-}
-async function isBiometricAvailable(){
-  if(!window.PublicKeyCredential) return false;
-  try{ return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable(); }
-  catch{ return false; }
-}
-function getDeviceName(){
-  const ua=navigator.userAgent;
-  if(/iPhone/.test(ua)) return 'iPhone';
-  if(/iPad/.test(ua)) return 'iPad';
-  if(/Android/.test(ua)) return 'Android';
-  if(/Mac OS/.test(ua)) return 'Mac';
-  if(/Windows/.test(ua)) return 'Windows PC';
-  return 'Unknown Device';
-}
-function clearAuthState(){
-  pendingPasswordSession=null; pendingBioEmail=''; pendingCredentials=[]; pendingOtpEmail='';
-  sb.auth.signOut().catch(()=>{});
-}
-function showScreen(id){
-  ['loginScreen','bioAuthScreen','bioRegisterScreen','otpScreen'].forEach(s=>{
-    const el=document.getElementById(s);
-    if(el) el.style.display= s===id?'flex':'none';
-  });
-}
-
-// ── OTP helpers ─────────────────────────────────
-function otpNext(el,nextId){
-  el.value=el.value.replace(/[^0-9]/g,'');
-  if(el.value&&nextId)document.getElementById(nextId).focus();
-}
-function otpBack(e,el,prevId){
-  if(e.key==='Backspace'&&!el.value&&prevId)document.getElementById(prevId).focus();
-}
-function clearOtpInputs(){['o1','o2','o3','o4','o5','o6'].forEach(id=>{document.getElementById(id).value='';}); }
-
-function backFromOtp(){
-  clearAuthState(); clearOtpInputs();
-  document.getElementById('otpErr').style.display='none';
-  showScreen('loginScreen');
-}
-async function resendOtp(){
-  if(!pendingOtpEmail) return;
-  const err=document.getElementById('otpErr'); err.style.display='none';
-  showLoading(true);
-  const {error}=await sb.auth.sendOtp(pendingOtpEmail);
-  showLoading(false);
-  if(error){err.textContent='Could not resend: '+error.message;err.style.display='block';}
-  else{err.style.cssText='display:block;background:#e8f7f1;color:#2d8a5e;border-left-color:#2d8a5e';err.textContent='✅ New code sent — check your email.';}
-}
-async function doVerifyOtp(){
-  const code=['o1','o2','o3','o4','o5','o6'].map(id=>document.getElementById(id).value).join('');
-  const err=document.getElementById('otpErr'); err.style.display='none';
-  if(code.length<6){err.textContent='Please enter the full 6-digit code.';err.style.display='block';return;}
-  showLoading(true);
-  const {data,error}=await sb.auth.verifyOtp(pendingOtpEmail,code);
-  if(error){
-    showLoading(false);
-    err.textContent=error.message||'Invalid or expired code. Try again.';
-    err.style.display='block'; clearOtpInputs(); document.getElementById('o1').focus(); return;
-  }
-  clearOtpInputs(); pendingOtpEmail='';
-  showScreen(null); // hide all
-  await initApp(data.session);
-}
-
-// ── Biometric auth ──────────────────────────────
-function backFromBioAuth(){ clearAuthState(); showScreen('loginScreen'); }
-function backFromBioReg(){ clearAuthState(); showScreen('loginScreen'); }
-
-async function skipBioAuth(){
-  // Fall through to email OTP
-  const email=pendingBioEmail;
-  document.getElementById('bioAuthScreen').style.display='none';
-  showLoading(true);
-  const {error}=await sb.auth.sendOtp(email);
-  showLoading(false);
-  if(error){clearAuthState();showScreen('loginScreen');document.getElementById('loginErr').textContent='Could not send code: '+error.message;document.getElementById('loginErr').style.display='block';return;}
-  pendingOtpEmail=email;
-  document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
-  showScreen('otpScreen'); setTimeout(()=>document.getElementById('o1').focus(),100);
-}
-async function skipBioRegister(){
-  // Fall through to email OTP
-  const email=pendingBioEmail;
-  document.getElementById('bioRegisterScreen').style.display='none';
-  showLoading(true);
-  const {error}=await sb.auth.sendOtp(email);
-  showLoading(false);
-  if(error){clearAuthState();showScreen('loginScreen');document.getElementById('loginErr').textContent='Could not send code: '+error.message;document.getElementById('loginErr').style.display='block';return;}
-  pendingOtpEmail=email;
-  document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
-  showScreen('otpScreen'); setTimeout(()=>document.getElementById('o1').focus(),100);
-}
-
-async function doAuthBiometric(){
-  const err=document.getElementById('bioAuthErr'); err.style.display='none';
-  try{
-    showLoading(true);
-    const challenge=crypto.getRandomValues(new Uint8Array(32));
-    const allowCredentials=pendingCredentials.map(c=>({id:b64urlToBuf(c.credential_id),type:'public-key'}));
-    const assertion=await navigator.credentials.get({publicKey:{
-      challenge, rpId:window.location.hostname,
-      allowCredentials, userVerification:'required', timeout:60000
-    }});
-    // Verify credential ID is one we stored for this user
-    const assertedId=bufToB64url(assertion.rawId);
-    if(!pendingCredentials.some(c=>c.credential_id===assertedId)) throw new Error('Credential not recognized.');
-    pendingCredentials=[];
-    showScreen(null);
-    await initApp(pendingPasswordSession);
-  }catch(e){
-    showLoading(false);
-    err.textContent=e.name==='NotAllowedError'?'Verification cancelled or timed out.':(e.message||'Biometric verification failed.');
-    err.style.display='block';
-  }
-}
-
-async function doRegisterBiometric(){
-  const err=document.getElementById('bioRegErr'); err.style.display='none';
-  try{
-    showLoading(true);
-    const userId=pendingPasswordSession.user.id;
-    const email=pendingBioEmail;
-    const challenge=crypto.getRandomValues(new Uint8Array(32));
-    const credential=await navigator.credentials.create({publicKey:{
-      challenge,
-      rp:{name:'IBG Payroll',id:window.location.hostname},
-      user:{id:new TextEncoder().encode(userId),name:email,displayName:email},
-      pubKeyCredParams:[{alg:-7,type:'public-key'},{alg:-257,type:'public-key'}],
-      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},
-      timeout:60000, attestation:'none'
-    }});
-    const credentialId=bufToB64url(credential.rawId);
-    const {error:dbErr}=await sb.from('webauthn_credentials').insert({
-      user_id:userId, credential_id:credentialId, device_name:getDeviceName()
-    });
-    if(dbErr) throw dbErr;
-    showScreen(null);
-    await initApp(pendingPasswordSession);
-  }catch(e){
-    showLoading(false);
-    err.textContent=e.name==='NotAllowedError'?'Setup cancelled.':(e.message||'Could not set up biometric login.');
-    err.style.display='block';
-  }
-}
-
-// ── Main login ──────────────────────────────────
-function switchTab(t){
-  activeTab = t;
-  document.getElementById('tabSignIn').classList.toggle('active', t==='in');
-  document.getElementById('tabSignUp').classList.toggle('active', t==='up');
-  document.getElementById('signUpFields').style.display = t==='up'?'block':'none';
-  document.getElementById('authBtn').textContent = t==='in'?'Sign In →':'Create Account →';
-  document.getElementById('loginErr').style.display='none';
-}
-
-async function doAuth(){
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass  = document.getElementById('loginPass').value;
-  const err   = document.getElementById('loginErr');
-  err.style.display='none';
-
-  const locked = _bfMinsLeft();
-  if(locked>0){
-    err.textContent=`Too many failed attempts. Try again in ${locked} minute${locked>1?'s':''}.`;
-    err.style.display='block';
-    return;
-  }
-
-  if(!email||!pass){err.textContent='Please enter your email and password.';err.style.display='block';return;}
-  showLoading(true);
-  try{
-    if(activeTab==='in'){
-      // Step 1: verify password
-      const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
-      if(error){ _bfFail(); throw error; }
-      _bfReset();
-      pendingPasswordSession = data.session;
-      pendingBioEmail = email;
-
-      // Step 2: check biometric availability and existing credentials
-      const bioAvail = await isBiometricAvailable();
-      if(bioAvail){
-        const {data:creds} = await sb.from('webauthn_credentials').select('credential_id').eq('user_id',data.session.user.id);
-        if(creds && creds.length>0){
-          // Has registered credentials → prompt biometric
-          pendingCredentials = creds;
-          showLoading(false);
-          showScreen('bioAuthScreen');
-          setTimeout(()=>doAuthBiometric(),400); // auto-trigger
-          return;
-        } else {
-          // No credentials yet → offer to register
-          showLoading(false);
-          showScreen('bioRegisterScreen');
-          return;
-        }
-      }
-
-      // Step 3: biometric not available → email OTP fallback
-      const {error:otpErr} = await sb.auth.sendOtp(email);
-      if(otpErr) throw otpErr;
-      pendingOtpEmail = email;
-      showLoading(false);
-      document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
-      showScreen('otpScreen');
-      setTimeout(()=>document.getElementById('o1').focus(),100);
-      return;
-    } else {
-      const pass2=document.getElementById('loginPass2').value;
-      if(pass!==pass2){throw {message:'Passwords do not match.'};}
-      const {data,error} = await sb.auth.signUp({email,password:pass});
-      if(error) throw error;
-      showLoading(false);
-      err.style.cssText='display:block;background:#e8f7f1;color:#2d8a5e;border-left-color:#2d8a5e';
-      err.textContent='✅ Check your email to confirm your account, then sign in.';
-    }
-  } catch(e){
-    showLoading(false);
-    let msg = e.message||'';
-    if(!msg || msg==='{}'||msg==='[]'||msg==='undefined')
-      msg='Sign in failed. Please check your email and password.';
-    err.textContent = msg;
-    err.style.display='block';
-  }
-}
-
-async function initApp(session){
-  currentUser = session.user;
-  // Find employee record
-  const {data:emp} = await sb.from('employees').select('*').eq('user_id',currentUser.id).maybeSingle();
-  if(!emp){
-    // Try linking by email
-    const {data:empByEmail} = await sb.from('employees').select('*').eq('email',currentUser.email).is('user_id',null).maybeSingle();
-    if(empByEmail){
-      await sb.from('employees').update({user_id:currentUser.id}).eq('id',empByEmail.id);
-      currentEmployee = {...empByEmail, user_id:currentUser.id};
-    } else {
-      showLoading(false);
-      const err=document.getElementById('loginErr');
-      err.textContent='No employee record found for this email. Please contact HR to activate your account.';
-      err.style.display='block';
-      await sb.auth.signOut();
-      return;
-    }
-  } else {
-    currentEmployee = emp;
-  }
-  currentRole = currentEmployee.role || 'employee';
-  await loadData();
-  renderAppShell();
-  nav('dashboard');
-  document.getElementById('loginScreen').style.display='none';
-  document.getElementById('app').style.display='flex';
-  showLoading(false);
-}
-
-async function doLogout(){
-  await sb.auth.signOut();
-  currentUser=null; currentEmployee=null; currentRole='employee';
-  DB={employees:[],attendance:[],leaves:[],claims:[],payroll:[]};
-  document.getElementById('app').style.display='none';
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('loginEmail').value='';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginErr').style.display='none';
-}
-
-// ═══════════════════════════════════════════════
-// LOADING & TOAST
-// ═══════════════════════════════════════════════
-function showLoading(v){ document.getElementById('loadingOverlay').style.display=v?'flex':'none'; }
-function toast(msg,type='success'){
-  const t=document.createElement('div');
-  t.className='toast '+(type==='error'?'error':type==='info'?'info':'');
-  t.innerHTML=(type==='error'?'❌ ':type==='info'?'ℹ️ ':'✅ ')+msg;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(),4000);
-}
-
-// ═══════════════════════════════════════════════
-// DATA NORMALIZATION
-// ═══════════════════════════════════════════════
-function normAtt(r){return{id:r.id,empId:r.emp_id,date:r.date,timeIn:r.time_in,timeOut:r.time_out,status:r.status,ot:r.ot,remarks:r.remarks};}
-function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date,to:r.to_date,reason:r.reason,pay:r.pay,status:r.status,filed:r.filed_date};}
-function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
-function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
-
-function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
-function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
-function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
-function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
-
-// ═══════════════════════════════════════════════
-// LOAD DATA FROM SUPABASE
-// ═══════════════════════════════════════════════
-async function loadData(){
-  try{
-    if(currentRole==='admin'){
-      const [e,a,l,c,p] = await Promise.all([
-        sb.from('employees').select('*').order('name'),
-        sb.from('attendance').select('*').order('date',{ascending:false}),
-        sb.from('leaves').select('*').order('created_at',{ascending:false}),
-        sb.from('claims').select('*').order('created_at',{ascending:false}),
-        sb.from('payroll').select('*').order('month',{ascending:false}),
-      ]);
-      DB.employees  = e.data||[];
-      DB.attendance = (a.data||[]).map(normAtt);
-      DB.leaves     = (l.data||[]).map(normLeave);
-      DB.claims     = (c.data||[]).map(normClaim);
-      DB.payroll    = (p.data||[]).map(normPayroll);
-    } else {
-      const eid = currentEmployee.id;
-      DB.employees = [currentEmployee];
-      const [a,l,c,p] = await Promise.all([
-        sb.from('attendance').select('*').eq('emp_id',eid).order('date',{ascending:false}),
-        sb.from('leaves').select('*').eq('emp_id',eid).order('created_at',{ascending:false}),
-        sb.from('claims').select('*').eq('emp_id',eid).order('created_at',{ascending:false}),
-        sb.from('payroll').select('*').eq('emp_id',eid).order('month',{ascending:false}),
-      ]);
-      DB.attendance = (a.data||[]).map(normAtt);
-      DB.leaves     = (l.data||[]).map(normLeave);
-      DB.claims     = (c.data||[]).map(normClaim);
-      DB.payroll    = (p.data||[]).map(normPayroll);
-    }
-  }catch(e){toast('Error loading data: '+e.message,'error');}
-}
-
-async function refreshData(){
-  showLoading(true);
-  await loadData();
-  showLoading(false);
-  refreshPage();
-}
-
-// ═══════════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════════
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function fmt(n){return'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function fmtDate(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}
-function today(){return new Date().toISOString().split('T')[0]}
-function currentMonth(){return document.getElementById('globalMonth')?.value||new Date().toISOString().slice(0,7)}
-function monthLabel(ym){const[y,m]=ym.split('-');const n=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return n[+m]+' '+y}
-function daysBetween(a,b){return Math.max(1,Math.round((new Date(b)-new Date(a))/(1000*60*60*24))+1)}
-function initials(name){return name.split(',')[0].trim().slice(0,2).toUpperCase()}
-function openModal(id){document.getElementById(id).classList.add('open')}
-function closeModal(id){document.getElementById(id).classList.remove('open')}
-function statusBadge(s){const m={Active:'badge-green',Approved:'badge-green',Pending:'badge-amber',Rejected:'badge-red',Inactive:'badge-gray',Resigned:'badge-gray',Terminated:'badge-red',Present:'badge-green',Absent:'badge-red',Late:'badge-amber','Half Day':'badge-purple','Rest Day Work':'badge-maroon',Holiday:'badge-gray'};return`<span class="badge ${m[s]||'badge-gray'}">${s}</span>`}
-
-// ═══════════════════════════════════════════════
-// PAYROLL COMPUTATIONS
-// ═══════════════════════════════════════════════
-function computeSSS(sal){
-  const msc=Math.min(Math.max(Math.ceil((sal-749)/500)*500+1000,1000),30000);
-  const ee=Math.round(msc*0.045);
-  const er=Math.round(msc*0.095)+(sal>14750?30:10); // includes EC
-  return{ee,er};
-}
-function computePhilHealth(sal){
-  const ee=Math.min(Math.max(Math.round(sal*0.025),250),2500);
-  return{ee,er:ee}; // 50/50 split
-}
-function computePagibig(sal){
-  const rate=sal<=1500?0.01:0.02;
-  const ee=Math.min(Math.round(sal*rate),200);
-  return{ee,er:Math.min(Math.round(sal*0.02),200)};
-}
-function computeTax(ti){
-  if(ti<=20833)return 0;
-  if(ti<=33332)return Math.round((ti-20833)*0.20);
-  if(ti<=66666)return Math.round(2500+(ti-33333)*0.25);
-  if(ti<=166666)return Math.round(10833+(ti-66667)*0.30);
-  if(ti<=666666)return Math.round(40833+(ti-166667)*0.32);
-  return Math.round(200833+(ti-666667)*0.35);
-}
-function computePayroll(emp,month){
-  const workDays=22,daily=emp.salary/workDays,hourly=daily/8;
-  const atts=DB.attendance.filter(a=>a.empId===emp.id&&a.date.startsWith(month));
-  let absent=0,lateHrs=0,halfDay=0,otHours=0,restDays=0;
-  atts.forEach(a=>{
-    if(a.status==='Absent')absent++;
-    else if(a.status==='Late')lateHrs+=0.5;
-    else if(a.status==='Half Day')halfDay++;
-    else if(a.status==='Rest Day Work')restDays++;
-    otHours+=parseFloat(a.ot||0);
-  });
-  const lwop=DB.leaves.filter(l=>l.empId===emp.id&&l.status==='Approved'&&l.pay==='0'&&l.from&&l.from.startsWith(month)).reduce((s,l)=>s+daysBetween(l.from,l.to),0);
-  const absentDed=(absent+lwop)*daily,lateDed=lateHrs*hourly,halfDed=halfDay*(daily/2);
-  const otPay=otHours*hourly*1.25,restPay=restDays*daily*1.30;
-  const grossPay=emp.salary+otPay+restPay-absentDed-lateDed-halfDed;
-  const allowances=(+emp.rice||0)+(+emp.trans||0)+(+emp.phone||0)+(+emp.other||0);
-  const sssData=computeSSS(emp.salary),phicData=computePhilHealth(emp.salary),hdmfData=computePagibig(emp.salary);
-  const sss=sssData.ee,phic=phicData.ee,hdmf=hdmfData.ee;
-  const sssEr=sssData.er,phicEr=phicData.er,hdmfEr=hdmfData.er;
-  const totalStatutory=sss+phic+hdmf;
-  const nonTaxRice=Math.min(+emp.rice||0,2000);
-  const taxableIncome=grossPay+allowances-nonTaxRice-totalStatutory;
-  const withholdingTax=computeTax(Math.max(0,taxableIncome));
-  const approvedClaims=DB.claims.filter(c=>c.empId===emp.id&&c.status==='Approved'&&c.date&&c.date.startsWith(month)).reduce((s,c)=>s+parseFloat(c.amount),0);
-  const netPay=grossPay+allowances-totalStatutory-withholdingTax+approvedClaims;
-  const totalEmployerCost=grossPay+allowances+sssEr+phicEr+hdmfEr;
-  return{grossPay,allowances,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax,totalStatutory,totalEmployerCost,netPay,otPay,restPay,absentDed,lateDed,halfDed,otHours,absent,lwop,approvedClaims,daily,hourly,taxableIncome,lateHrs,halfDay,restDays};
-}
-
-// ═══════════════════════════════════════════════
-// APP SHELL & NAVIGATION
-// ═══════════════════════════════════════════════
-const pageTitles={dashboard:'Dashboard',employees:'Employee Directory',attendance:'Attendance — DTR',leaves:'Leave Management',claims:'Claims & Expenses',payroll:'Process Payroll',payslips:'Payslips',thirteenth:'13th Month Pay',reports:'Payroll Reports','my-leaves':'My Leave Requests','my-claims':'My Expense Claims','my-payslips':'My Payslips'};
-
-function renderAppShell(){
-  // Topbar user info
-  const name = currentEmployee?.name || currentUser?.email || 'User';
-  document.getElementById('userName').textContent = name.split(',')[0].trim();
-  document.getElementById('userAvatar').textContent = initials(name);
-  document.getElementById('userRole').textContent = currentRole==='admin'?'Admin':'Employee';
-  document.getElementById('globalMonth').value = new Date().toISOString().slice(0,7);
-
-  // Sidebar nav
-  const navEl = document.getElementById('sidebarNav');
-  if(currentRole==='admin'){
-    navEl.innerHTML=`
-      <div class="sb-section">Main</div>
-      <div class="sb-item" onclick="nav('dashboard')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</div>
-      <div class="sb-item" onclick="nav('employees')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Employees</div>
-      <div class="sb-section">Workforce</div>
-      <div class="sb-item" onclick="nav('attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>Attendance DTR</div>
-      <div class="sb-item" onclick="nav('leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Leave Management</div>
-      <div class="sb-item" onclick="nav('claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>Claims & Expenses</div>
-      <div class="sb-section">Payroll</div>
-      <div class="sb-item" onclick="nav('payroll')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></span>Process Payroll</div>
-      <div class="sb-item" onclick="nav('payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>Payslips</div>
-      <div class="sb-item" onclick="nav('thirteenth')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>13th Month Pay</div>
-      <div class="sb-item" onclick="nav('reports')"><span class="icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</div>
-      <div class="sb-section" style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px">My Portal</div>
-      <div class="sb-item" onclick="nav('my-profile')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>My Details</div>
-      <div class="sb-item" onclick="nav('my-attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>My Attendance</div>
-      <div class="sb-item" onclick="nav('my-leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>My Leaves</div>
-      <div class="sb-item" onclick="nav('my-claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>My Claims</div>
-      <div class="sb-item" onclick="nav('my-payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>My Payslips</div>
-      <div class="sb-item" onclick="nav('my-13th')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>My 13th Month</div>`;
-  } else {
-    navEl.innerHTML=`
-      <div class="sb-section">My Account</div>
-      <div class="sb-item" onclick="nav('dashboard')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</div>
-      <div class="sb-item" onclick="nav('my-profile')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>My Details</div>
-      <div class="sb-section">Workforce</div>
-      <div class="sb-item" onclick="nav('my-attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>My Attendance</div>
-      <div class="sb-item" onclick="nav('my-leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>My Leaves</div>
-      <div class="sb-item" onclick="nav('my-claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>My Claims & Expenses</div>
-      <div class="sb-section">Payroll</div>
-      <div class="sb-item" onclick="nav('my-payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>My Payslips</div>
-      <div class="sb-item" onclick="nav('my-13th')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>My 13th Month</div>`;
-  }
-}
-
-let currentPage = 'dashboard';
-function nav(page){
-  currentPage=page;
-  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick')===`nav('${page}')`));
-  document.getElementById('pageTitle').textContent=pageTitles[page]||page;
-  const renders={
-    dashboard:renderDashboard,employees:renderEmployees,attendance:renderAttendance,
-    leaves:renderLeaves,claims:renderClaims,payroll:renderPayroll,
-    payslips:renderPayslips,thirteenth:renderThirteenth,reports:renderReports,
-    'my-leaves':renderMyLeaves,'my-claims':renderMyClaims,'my-payslips':renderMyPayslips,
-    'my-profile':renderMyProfile,'my-attendance':renderMyAttendance,'my-13th':renderMy13th
-  };
-  if(renders[page])renders[page]();
-}
-function refreshPage(){nav(currentPage);}
-
-// ═══════════════════════════════════════════════
-// RENDER: ADMIN DASHBOARD
-// ═══════════════════════════════════════════════
-function renderDashboard(){
-  const m=currentMonth();
-  const activeEmps=DB.employees.filter(e=>e.status==='Active').length;
-  const pendingLeaves=DB.leaves.filter(l=>l.status==='Pending').length;
-  const pendingClaims=DB.claims.filter(c=>c.status==='Pending').length;
-  const monthPayroll=DB.payroll.filter(p=>p.month===m);
-  const totalNet=monthPayroll.reduce((s,p)=>s+parseFloat(p.netPay||0),0);
-
-  if(currentRole==='employee'){
-    const emp=currentEmployee;
-    const myLeaves=DB.leaves.filter(l=>l.empId===emp.id);
-    const myClaims=DB.claims.filter(c=>c.empId===emp.id);
-    const latestPay=DB.payroll.find(p=>p.empId===emp.id);
-    document.getElementById('content').innerHTML=`
-      <div class="cards">
-        <div class="card green"><div class="card-accent"></div><div class="card-icon">🌿</div><div class="card-val">${myLeaves.filter(l=>l.status==='Pending').length}</div><div class="card-label">Pending Leaves</div></div>
-        <div class="card amber"><div class="card-accent"></div><div class="card-icon">💼</div><div class="card-val">${myClaims.filter(c=>c.status==='Pending').length}</div><div class="card-label">Pending Claims</div></div>
-        <div class="card maroon"><div class="card-accent"></div><div class="card-icon">📄</div><div class="card-val">${DB.payroll.filter(p=>p.empId===emp.id).length}</div><div class="card-label">Payslips</div></div>
-        <div class="card purple"><div class="card-accent"></div><div class="card-icon">💰</div><div class="card-val">${latestPay?fmt(latestPay.netPay):'—'}</div><div class="card-label">Latest Net Pay</div></div>
-      </div>
-      <div class="info-box">Welcome back, <strong>${emp.name.split(',')[0].trim()}</strong>! Use the sidebar to file leaves or expense claims. Your HR team will review and approve them.</div>`;
-    return;
-  }
-
-  document.getElementById('content').innerHTML=`
-    <div class="cards">
-      <div class="card maroon"><div class="card-accent"></div><div class="card-icon">👥</div><div class="card-val">${activeEmps}</div><div class="card-label">Active Employees</div><div class="card-sub">${DB.employees.length} total</div></div>
-      <div class="card green"><div class="card-accent"></div><div class="card-icon">💰</div><div class="card-val">${monthPayroll.length>0?fmt(totalNet):'Not processed'}</div><div class="card-label">${monthLabel(m)} Net Payroll</div></div>
-      <div class="card amber"><div class="card-accent"></div><div class="card-icon">🌿</div><div class="card-val">${pendingLeaves}</div><div class="card-label">Pending Leaves</div><div class="card-sub">Awaiting approval</div></div>
-      <div class="card purple"><div class="card-accent"></div><div class="card-icon">💼</div><div class="card-val">${pendingClaims}</div><div class="card-label">Pending Claims</div><div class="card-sub">Awaiting approval</div></div>
-    </div>
-    <div class="two-col">
-      <div>
-        <div class="section-header"><div><div class="section-title">Recent Leaves</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Type</th><th>Status</th></tr></thead><tbody>
-        ${DB.leaves.slice(0,5).map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr><td>${e?esc(e.name.split(',')[0]):'—'}</td><td>${esc(l.type)}</td><td>${statusBadge(l.status)}</td></tr>`}).join('')||'<tr><td colspan="3" class="no-data">No leaves filed</td></tr>'}
-        </tbody></table></div>
-      </div>
-      <div>
-        <div class="section-header"><div><div class="section-title">Recent Claims</div></div></div>
-        <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Category</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-        ${DB.claims.slice(0,5).map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr><td>${e?esc(e.name.split(',')[0]):'—'}</td><td>${esc(c.category)}</td><td>${fmt(c.amount)}</td><td>${statusBadge(c.status)}</td></tr>`}).join('')||'<tr><td colspan="4" class="no-data">No claims filed</td></tr>'}
-        </tbody></table></div>
-      </div>
-    </div>`;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: EMPLOYEES
-// ═══════════════════════════════════════════════
-function renderEmployees(){
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">Employee Directory</div><div class="section-sub">${DB.employees.length} employees on record</div></div>
-      <button class="btn btn-primary" onclick="openEmpModal()">+ Add Employee</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Company</th><th>Position</th><th>Department</th><th>Type</th><th>Basic Salary</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-    ${DB.employees.length?DB.employees.map(e=>`<tr>
-      <td><strong>${e.id}</strong></td>
-      <td>${esc(e.name)}</td>
-      <td style="font-size:11px;max-width:140px">${e.company?`<span style="display:inline-block;padding:2px 7px;border-radius:20px;background:${e.company.includes('Corporation')?'#fff3cd':'#d4edff'};color:${e.company.includes('Corporation')?'#856404':'#0c5460'};font-weight:600">${e.company.includes('Corporation')?'IBG PH':'IBG SG'}</span>`:'—'}</td>
-      <td>${e.position||'—'}</td>
-      <td>${e.dept||'—'}</td>
-      <td><span class="badge badge-${e.emptype==='Regular'?'green':e.emptype==='Probationary'?'amber':'gray'}">${e.emptype||'—'}</span></td>
-      <td>${fmt(e.salary)}</td>
-      <td>${statusBadge(e.status||'Active')}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="editEmployee('${e.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${e.id}')">🗑️</button></td>
-    </tr>`).join(''):'<tr><td colspan="9" class="no-data"><div class="no-data-icon">👥</div>No employees yet. Add your first employee.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function togglePaymentFields(){
-  const ch=document.getElementById('f_payment_channel').value;
-  const isBank=ch==='bank';
-  const isCash=ch==='cash';
-  const bankGroup=document.getElementById('bank_fields_group');
-  const eWalletGroup=document.getElementById('ewallet_fields_group');
-  if(isBank||isCash){
-    bankGroup.style.display='contents';
-    eWalletGroup.style.display='none';
-    if(isCash){document.getElementById('f_bank_name').value='';document.getElementById('f_bank_account_number').value='';document.getElementById('f_bank_account_name').value='';}
-  } else {
-    bankGroup.style.display='none';
-    eWalletGroup.style.display='block';
-    const labels={gcash:'GCash Number',maya:'Maya Number',gotyme:'GoTyme Number',unionbank_online:'Account Number'};
-    document.getElementById('f_mobile_label').textContent=labels[ch]||'Mobile Number';
-  }
-}
-function openEmpModal(id){
-  document.getElementById('empModalTitle').textContent = id?'Edit Employee':'Add Employee';
-  const fields=['id','name','pos','dept','type','hired','sal','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status'];
-  const keys  =['id','name','position','dept','emptype','hired','salary','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status'];
-  if(id){
-    const e=DB.employees.find(x=>x.id===id);
-    if(!e)return;
-    fields.forEach((f,i)=>{
-      const el=document.getElementById('f_'+f);
-      if(el)el.value=e[keys[i]]||'';
-    });
-    document.getElementById('f_company').value=e.company||'I-BG Consultancy & Trading (S) Pte Ltd';
-    document.getElementById('f_payment_channel').value=e.payment_channel||'bank';
-    document.getElementById('f_bank_name').value=e.bank_name||'';
-    document.getElementById('f_bank_account_number').value=e.bank_account_number||'';
-    document.getElementById('f_bank_account_name').value=e.bank_account_name||'';
-    document.getElementById('f_mobile_number').value=e.mobile_number||'';
-    document.getElementById('f_bank_account_name_ewallet').value=e.bank_account_name||'';
-    document.getElementById('f_id').disabled=true;
-  } else {
-    fields.forEach(f=>{const el=document.getElementById('f_'+f);if(el)el.value='';});
-    document.getElementById('f_rice').value='2000';
-    document.getElementById('f_id').disabled=false;
-    document.getElementById('f_status').value='Active';
-    document.getElementById('f_type').value='Regular';
-    document.getElementById('f_role').value='employee';
-    document.getElementById('f_company').value='I-BG Consultancy & Trading (S) Pte Ltd';
-    document.getElementById('f_payment_channel').value='bank';
-    document.getElementById('f_bank_name').value='';
-    document.getElementById('f_bank_account_number').value='';
-    document.getElementById('f_bank_account_name').value='';
-    document.getElementById('f_mobile_number').value='';
-    document.getElementById('f_bank_account_name_ewallet').value='';
-  }
-  togglePaymentFields();
-  document.getElementById('empModal').dataset.editId = id||'';
-  openModal('empModal');
-}
-function editEmployee(id){openEmpModal(id);}
-
-async function saveEmployee(){
-  const editId=document.getElementById('empModal').dataset.editId;
-  const emp={
-    id:editId||document.getElementById('f_id').value.trim(),
-    company:document.getElementById('f_company').value,
-    name:document.getElementById('f_name').value.trim(),
-    position:document.getElementById('f_pos').value.trim(),
-    dept:document.getElementById('f_dept').value.trim(),
-    emptype:document.getElementById('f_type').value,
-    hired:document.getElementById('f_hired').value,
-    salary:parseFloat(document.getElementById('f_sal').value)||0,
-    rice:parseFloat(document.getElementById('f_rice').value)||0,
-    trans:parseFloat(document.getElementById('f_trans').value)||0,
-    phone:parseFloat(document.getElementById('f_phone').value)||0,
-    other:parseFloat(document.getElementById('f_other').value)||0,
-    email:document.getElementById('f_email').value.trim(),
-    sss:document.getElementById('f_sss').value.trim(),
-    phic:document.getElementById('f_phic').value.trim(),
-    hdmf:document.getElementById('f_hdmf').value.trim(),
-    tin:document.getElementById('f_tin').value.trim(),
-    contact:document.getElementById('f_contact').value.trim(),
-    address:document.getElementById('f_address').value.trim(),
-    role:document.getElementById('f_role').value,
-    status:document.getElementById('f_status').value,
-    payment_channel:document.getElementById('f_payment_channel').value||'bank',
-    bank_name:document.getElementById('f_bank_name').value,
-    bank_account_number:(document.getElementById('f_payment_channel').value==='bank'||document.getElementById('f_payment_channel').value==='cash')?document.getElementById('f_bank_account_number').value.trim():document.getElementById('f_mobile_number').value.trim(),
-    bank_account_name:(document.getElementById('f_payment_channel').value==='bank'||document.getElementById('f_payment_channel').value==='cash')?document.getElementById('f_bank_account_name').value.trim():document.getElementById('f_bank_account_name_ewallet').value.trim(),
-    mobile_number:document.getElementById('f_mobile_number').value.trim(),
-  };
-  if(!emp.id||!emp.name){toast('Employee ID and Name are required.','error');return;}
-  showLoading(true);
-  const {error}=await sb.from('employees').upsert(emp);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  const idx=DB.employees.findIndex(e=>e.id===emp.id);
-  if(idx>=0)DB.employees[idx]=emp; else DB.employees.push(emp);
-  closeModal('empModal');
-  toast(editId?'Employee updated!':'Employee added!');
-  renderEmployees();
-}
-
-async function deleteEmployee(id){
-  if(!confirm('Delete this employee? All their records will be removed.'))return;
-  showLoading(true);
-  const {error}=await sb.from('employees').delete().eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.employees=DB.employees.filter(e=>e.id!==id);
-  toast('Employee deleted.');
-  renderEmployees();
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: ATTENDANCE
-// ═══════════════════════════════════════════════
-function renderAttendance(){
-  const m=currentMonth();
-  const atts=DB.attendance.filter(a=>a.date&&a.date.startsWith(m));
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">Attendance — ${monthLabel(m)}</div><div class="section-sub">${atts.length} records</div></div>
-      <button class="btn btn-primary" onclick="openAttModal()">+ Log Attendance</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hrs</th><th>Remarks</th><th></th></tr></thead><tbody>
-    ${atts.length?atts.map(a=>{const e=DB.employees.find(x=>x.id===a.empId);return`<tr>
-      <td>${e?e.name:'—'}</td><td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
-      <td>${statusBadge(a.status)}</td><td>${a.ot||0}</td><td>${a.remarks||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteAttendance('${a.id}')">🗑️</button></td>
-    </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function openAttModal(){
-  const sel=document.getElementById('a_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
-  document.getElementById('a_date').value=today();
-  openModal('attModal');
-}
-
-async function saveAttendance(){
-  const att={id:uid(),empId:document.getElementById('a_emp').value,date:document.getElementById('a_date').value,timeIn:document.getElementById('a_in').value,timeOut:document.getElementById('a_out').value,status:document.getElementById('a_status').value,ot:parseFloat(document.getElementById('a_ot').value)||0,remarks:document.getElementById('a_remarks').value};
-  if(!att.empId||!att.date){toast('Select employee and date.','error');return;}
-  showLoading(true);
-  const {error}=await sb.from('attendance').insert(denormAtt(att));
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.attendance.unshift(att);
-  closeModal('attModal');
-  toast('Attendance logged!');
-  renderAttendance();
-}
-
-async function deleteAttendance(id){
-  if(!confirm('Delete this record?'))return;
-  showLoading(true);
-  const {error}=await sb.from('attendance').delete().eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.attendance=DB.attendance.filter(a=>a.id!==id);
-  toast('Record deleted.');
-  renderAttendance();
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: LEAVES (admin)
-// ═══════════════════════════════════════════════
-function renderLeaves(){
-  const pending=DB.leaves.filter(l=>l.status==='Pending');
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">Leave Management</div><div class="section-sub">${pending.length} pending approval</div></div>
-      <button class="btn btn-primary" onclick="openLeaveModal()">+ File Leave</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Pay</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead><tbody>
-    ${DB.leaves.length?DB.leaves.map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr>
-      <td>${e?e.name.split(',')[0]:'—'}</td><td>${l.type}</td><td>${fmtDate(l.from)}</td><td>${fmtDate(l.to)}</td>
-      <td>${l.pay==='1'?'<span class="badge badge-green">With Pay</span>':'<span class="badge badge-red">LWOP</span>'}</td>
-      <td>${statusBadge(l.status)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${l.reason||'—'}</td>
-      <td style="white-space:nowrap">${l.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateLeave('${l.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateLeave('${l.id}','Rejected')">✗</button> `:''}
-        <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" onclick="deleteLeave('${l.id}')">🗑️</button></td>
-    </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">🌿</div>No leave requests.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function openLeaveModal(preEmpId){
-  const sel=document.getElementById('l_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
-  if(preEmpId)sel.value=preEmpId;
-  document.getElementById('l_from').value=today();
-  document.getElementById('l_to').value=today();
-  openModal('leaveModal');
-}
-
-function onLeaveTypeChange(){
-  const type=document.getElementById('l_type').value;
-  const paySelect=document.getElementById('l_pay');
-  if(type==='LWOP (Without Pay)'){
-    paySelect.value='0';
-    paySelect.disabled=true;
-  } else {
-    paySelect.value='1';
-    paySelect.disabled=false;
-  }
-}
-async function saveLeave(){
-  const empId=document.getElementById('l_emp').value;
-  const leave={id:uid(),empId,type:document.getElementById('l_type').value,from:document.getElementById('l_from').value,to:document.getElementById('l_to').value,reason:document.getElementById('l_reason').value,pay:document.getElementById('l_pay').value,status:'Pending',filed:today()};
-  if(!empId||!leave.from||!leave.to){toast('Please fill all required fields.','error');return;}
-  showLoading(true);
-  const {error}=await sb.from('leaves').insert(denormLeave(leave));
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.leaves.unshift(leave);
-  closeModal('leaveModal');
-  toast('Leave filed successfully!');
-  currentRole==='admin'?renderLeaves():renderMyLeaves();
-}
-
-async function updateLeave(id,status){
-  showLoading(true);
-  const {error}=await sb.from('leaves').update({status}).eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  const idx=DB.leaves.findIndex(l=>l.id===id);
-  if(idx>=0)DB.leaves[idx].status=status;
-  toast(status==='Approved'?'Leave approved!':'Leave rejected.');
-  renderLeaves();
-}
-async function deleteLeave(id){
-  if(!confirm('Delete this leave record? This cannot be undone.'))return;
-  showLoading(true);
-  const {error}=await sb.from('leaves').delete().eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.leaves=DB.leaves.filter(l=>l.id!==id);
-  toast('Leave record deleted.');
-  renderLeaves();
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: CLAIMS (admin)
-// ═══════════════════════════════════════════════
-function renderClaims(){
-  const pending=DB.claims.filter(c=>c.status==='Pending');
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">Claims & Expenses</div><div class="section-sub">${pending.length} pending approval</div></div>
-      <button class="btn btn-primary" onclick="openClaimModal()">+ File Claim</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-    ${DB.claims.length?DB.claims.map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr>
-      <td>${e?e.name.split(',')[0]:'—'}</td><td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td><td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
-      <td>${statusBadge(c.status)}</td>
-      <td>${c.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateClaim('${c.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateClaim('${c.id}','Rejected')">✗</button>`:'—'}</td>
-    </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">💼</div>No expense claims.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function openClaimModal(preEmpId){
-  const sel=document.getElementById('c_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
-  if(preEmpId)sel.value=preEmpId;
-  sel.disabled=false;
-  document.getElementById('c_date').value=today();
-  document.getElementById('c_receipt_file').value='';
-  document.getElementById('c_receipt_status').textContent='';
-  openModal('claimModal');
-}
-
-async function saveClaim(){
-  const empId=document.getElementById('c_emp').value;
-  const fileInput=document.getElementById('c_receipt_file');
-  const file=fileInput.files[0];
-  if(!empId||!document.getElementById('c_date').value||!parseFloat(document.getElementById('c_amount').value)){toast('Please fill all required fields.','error');return;}
-  if(file&&file.size>5*1024*1024){toast('File too large. Maximum 5MB.','error');return;}
-  showLoading(true);
-  let receiptUrl='';
-  if(file){
-    const statusEl=document.getElementById('c_receipt_status');
-    statusEl.textContent='Uploading receipt...';
-    const ext=file.name.split('.').pop();
-    const path=`receipts/${empId}/${uid()}.${ext}`;
-    const {data:upData,error:upErr}=await sb.storage.from('claims-receipts').upload(path,file,{contentType:file.type,upsert:false});
-    if(upErr){
-      showLoading(false);
-      statusEl.textContent='Upload failed: '+upErr.message;
-      toast('Receipt upload failed: '+upErr.message,'error');
-      return;
-    }
-    const {data:urlData}=sb.storage.from('claims-receipts').getPublicUrl(path);
-    receiptUrl=urlData.publicUrl;
-    statusEl.textContent='✓ Uploaded';
-  }
-  const claim={id:uid(),empId,date:document.getElementById('c_date').value,category:document.getElementById('c_cat').value,amount:parseFloat(document.getElementById('c_amount').value)||0,desc:document.getElementById('c_desc').value,receipt:receiptUrl,status:'Pending',filed:today()};
-  const {error}=await sb.from('claims').insert(denormClaim(claim));
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.claims.unshift(claim);
-  closeModal('claimModal');
-  toast('Claim submitted!');
-  currentRole==='admin'?renderClaims():renderMyClaims();
-}
-
-async function updateClaim(id,status){
-  showLoading(true);
-  const {error}=await sb.from('claims').update({status}).eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  const idx=DB.claims.findIndex(c=>c.id===id);
-  if(idx>=0)DB.claims[idx].status=status;
-  toast(status==='Approved'?'Claim approved!':'Claim rejected.');
-  renderClaims();
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: PROCESS PAYROLL
-// ═══════════════════════════════════════════════
-function disburseBadge(status){
-  if(status==='disbursed')return`<span class="badge badge-green">💸 Disbursed</span>`;
-  if(status==='processing')return`<span class="badge" style="background:#fff3cd;color:#856404">⏳ Processing</span>`;
-  if(status==='failed')return`<span class="badge" style="background:#f8d7da;color:#842029">❌ Failed</span>`;
-  return`<span class="badge badge-gray">Pending</span>`;
-}
-function renderPayroll(){
-  const m=currentMonth();
-  const activeEmps=DB.employees.filter(e=>e.status==='Active');
-  const processed=DB.payroll.filter(p=>p.month===m);
-  const releasable=processed.filter(p=>p.disbursementStatus==='pending'||p.disbursementStatus==='failed');
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">Process Payroll — ${monthLabel(m)}</div><div class="section-sub">${processed.length} of ${activeEmps.length} employees processed</div></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" onclick="processAllPayroll()">⚙️ Process All</button>
-        ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" onclick="releasePayroll(${JSON.stringify(releasable.map(p=>p.id))})">💸 Release Payroll (${releasable.length})</button>`:''}
-      </div>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
-    ${activeEmps.map(e=>{
-      const p=processed.find(x=>x.empId===e.id);
-      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> <button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}</td></tr>`;
-      const comp=computePayroll(e,m);
-      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td><button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button></td></tr>`;
-    }).join('')||'<tr><td colspan="10" class="no-data">No active employees.</td></tr>'}
-    </tbody>
-    ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="6" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} employees)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
-    </table></div>`;
-}
-
-function channelLabel(ch){
-  const m={bank:'🏦 Bank (Wise)',gcash:'💚 GCash',maya:'💙 Maya',gotyme:'🟣 GoTyme',unionbank_online:'🔵 UB Online',cash:'💵 Cash'};
-  return m[ch]||'🏦 Bank (Wise)';
-}
-async function releasePayroll(payrollIds){
-  if(!payrollIds||payrollIds.length===0){toast('No payroll records to release','error');return;}
-  // Split by payment channel
-  const bankIds=[],manualIds=[];
-  for(const id of payrollIds){
-    const p=DB.payroll.find(x=>x.id===id);
-    const e=p?DB.employees.find(x=>x.id===p.empId):null;
-    const ch=e?.payment_channel||'bank';
-    if(ch==='bank'){bankIds.push(id);}else{manualIds.push(id);}
-  }
-  const allNames=payrollIds.map(id=>{const p=DB.payroll.find(x=>x.id===id);const e=p?DB.employees.find(x=>x.id===p.empId):null;return e?`${e.name.split(',')[0]} (${channelLabel(e.payment_channel||'bank')})`:id;});
-  if(!confirm(`Release payroll for:\n${allNames.join('\n')}\n\nBank Transfer employees will be sent via Wise.\nGCash/Maya/GoTyme/Cash will be marked as released (manual disbursement). Proceed?`))return;
-  showLoading(true);
-  try{
-    // Handle manual channels (GCash, Maya, GoTyme, Cash) — mark released immediately
-    if(manualIds.length>0){
-      const now=new Date().toISOString().slice(0,10);
-      for(const id of manualIds){
-        await sb.from('payroll').update({disbursement_status:'released',disbursement_date:now}).eq('id',id);
-        const idx=DB.payroll.findIndex(p=>p.id===id);
-        if(idx>=0){DB.payroll[idx].disbursementStatus='released';DB.payroll[idx].disbursementDate=now;}
-      }
-    }
-    // Handle bank transfer via Wise
-    if(bankIds.length>0){
-      const res=await fetch('https://gxtyhkwpctupbcydfuud.supabase.co/functions/v1/wise-disburse',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
-        body:JSON.stringify({payroll_ids:bankIds})
-      });
-      const data=await res.json();
-      if(!res.ok){showLoading(false);toast(data.error||'Wise disbursement failed','error');renderPayroll();return;}
-      for(const r of data.results){
-        const idx=DB.payroll.findIndex(p=>p.id===r.id);
-        if(idx>=0){
-          DB.payroll[idx].disbursementStatus=r.error?'failed':'processing';
-          if(r.transfer_id)DB.payroll[idx].wiseTransferId=String(r.transfer_id);
-        }
-      }
-      const ok=data.results.filter(r=>!r.error).length;
-      const fail=data.results.filter(r=>r.error).length;
-      toast(`Wise: ${ok} processing${fail>0?`, ${fail} failed`:''}. Manual: ${manualIds.length} released.`,fail>0?'error':'success');
-    } else {
-      toast(`${manualIds.length} payroll(s) marked as released.`);
-    }
-    showLoading(false);
-    renderPayroll();
-  }catch(err){showLoading(false);toast(err.message,'error');}
-}
-
-async function processSinglePayroll(empId){
-  const m=currentMonth();
-  const emp=DB.employees.find(e=>e.id===empId);
-  if(!emp)return;
-  const existing=DB.payroll.find(p=>p.empId===empId&&p.month===m);
-  if(existing){if(!confirm('Re-process this payroll? Existing record will be updated.'))return;}
-  const comp=computePayroll(emp,m);
-  const record={id:existing?existing.id:uid(),empId,month:m,...comp,processedDate:today()};
-  showLoading(true);
-  const {error}=await sb.from('payroll').upsert(denormPayroll(record));
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  const idx=DB.payroll.findIndex(p=>p.id===record.id);
-  if(idx>=0)DB.payroll[idx]=record; else DB.payroll.unshift(record);
-  toast('Payroll processed for '+emp.name.split(',')[0]);
-  renderPayroll();
-}
-
-async function processAllPayroll(){
-  if(!confirm('Process payroll for all active employees this month?'))return;
-  const m=currentMonth();
-  const activeEmps=DB.employees.filter(e=>e.status==='Active');
-  showLoading(true);
-  for(const emp of activeEmps){
-    const existing=DB.payroll.find(p=>p.empId===emp.id&&p.month===m);
-    const comp=computePayroll(emp,m);
-    const record={id:existing?existing.id:uid(),empId:emp.id,month:m,...comp,processedDate:today()};
-    const {error}=await sb.from('payroll').upsert(denormPayroll(record));
-    if(!error){const idx=DB.payroll.findIndex(p=>p.id===record.id);if(idx>=0)DB.payroll[idx]=record;else DB.payroll.unshift(record);}
-  }
-  showLoading(false);
-  toast('All payrolls processed!');
-  renderPayroll();
-}
-
-async function undoPayroll(payrollId){
-  const p=DB.payroll.find(x=>x.id===payrollId);
-  if(!p)return;
-  if(p.disbursementStatus==='released'){toast('Cannot undo a released payroll.','error');return;}
-  const emp=DB.employees.find(e=>e.id===p.empId);
-  const label=emp?emp.name.split(',')[0]:'this employee';
-  if(!confirm(`Delete payroll record for ${label} (${monthLabel(p.month)})?\n\nThis will reset them back to "Pending" for this month. This cannot be undone.`))return;
-  showLoading(true);
-  const {error}=await sb.from('payroll').delete().eq('id',payrollId);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.payroll=DB.payroll.filter(x=>x.id!==payrollId);
-  toast(`Payroll for ${label} removed.`);
-  renderPayroll();
-}
-function editPayroll(payrollId){
-  const p=DB.payroll.find(x=>x.id===payrollId);
-  if(!p){toast('Payroll record not found','error');return;}
-  const emp=DB.employees.find(e=>e.id===p.empId);
-  document.getElementById('ep_id').value=payrollId;
-  document.getElementById('ep_empname').textContent=emp?emp.name:'—';
-  document.getElementById('ep_month').textContent=monthLabel(p.month);
-  document.getElementById('ep_salary').value=emp?emp.salary:'';
-  document.getElementById('ep_grosspay').value=p.grossPay||0;
-  document.getElementById('ep_allowances').value=p.allowances||0;
-  document.getElementById('ep_sss').value=p.sss||0;
-  document.getElementById('ep_sss_er').value=p.sssEr||0;
-  document.getElementById('ep_phic').value=p.phic||0;
-  document.getElementById('ep_phic_er').value=p.phicEr||0;
-  document.getElementById('ep_hdmf').value=p.hdmf||0;
-  document.getElementById('ep_hdmf_er').value=p.hdmfEr||0;
-  document.getElementById('ep_tax').value=p.withholdingTax||0;
-  document.getElementById('ep_absentded').value=p.absentDed||0;
-  document.getElementById('ep_lateded').value=p.lateDed||0;
-  document.getElementById('ep_halfded').value=p.halfDed||0;
-  document.getElementById('ep_claims').value=p.approvedClaims||0;
-  calcEditNetPay();
-  openModal('editPayrollModal');
-}
-function calcEditNetPay(){
-  const gross=parseFloat(document.getElementById('ep_grosspay').value)||0;
-  const allow=parseFloat(document.getElementById('ep_allowances').value)||0;
-  const sss=parseFloat(document.getElementById('ep_sss').value)||0;
-  const phic=parseFloat(document.getElementById('ep_phic').value)||0;
-  const hdmf=parseFloat(document.getElementById('ep_hdmf').value)||0;
-  const tax=parseFloat(document.getElementById('ep_tax').value)||0;
-  const absDed=parseFloat(document.getElementById('ep_absentded').value)||0;
-  const lateDed=parseFloat(document.getElementById('ep_lateded').value)||0;
-  const halfDed=parseFloat(document.getElementById('ep_halfded').value)||0;
-  const claims=parseFloat(document.getElementById('ep_claims').value)||0;
-  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims;
-  document.getElementById('ep_netpay_preview').textContent=fmt(net);
-}
-async function savePayrollEdit(){
-  const payrollId=document.getElementById('ep_id').value;
-  const p=DB.payroll.find(x=>x.id===payrollId);
-  if(!p){toast('Payroll record not found','error');return;}
-  const gross=parseFloat(document.getElementById('ep_grosspay').value)||0;
-  const allow=parseFloat(document.getElementById('ep_allowances').value)||0;
-  const sss=parseFloat(document.getElementById('ep_sss').value)||0;
-  const sssEr=parseFloat(document.getElementById('ep_sss_er').value)||0;
-  const phic=parseFloat(document.getElementById('ep_phic').value)||0;
-  const phicEr=parseFloat(document.getElementById('ep_phic_er').value)||0;
-  const hdmf=parseFloat(document.getElementById('ep_hdmf').value)||0;
-  const hdmfEr=parseFloat(document.getElementById('ep_hdmf_er').value)||0;
-  const tax=parseFloat(document.getElementById('ep_tax').value)||0;
-  const absDed=parseFloat(document.getElementById('ep_absentded').value)||0;
-  const lateDed=parseFloat(document.getElementById('ep_lateded').value)||0;
-  const halfDed=parseFloat(document.getElementById('ep_halfded').value)||0;
-  const claims=parseFloat(document.getElementById('ep_claims').value)||0;
-  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims;
-  const totalEmployerCost=gross+allow+sssEr+phicEr+hdmfEr;
-  const updates={
-    gross_pay:gross,allowances:allow,sss,phic,hdmf,sss_er:sssEr,phic_er:phicEr,hdmf_er:hdmfEr,
-    withholding_tax:tax,absent_ded:absDed,late_ded:lateDed,half_ded:halfDed,
-    approved_claims:claims,total_statutory:sss+phic+hdmf,total_employer_cost:totalEmployerCost,net_pay:net
-  };
-  showLoading(true);
-  const {error}=await sb.from('payroll').update(updates).eq('id',payrollId);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  Object.assign(p,{grossPay:gross,allowances:allow,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax:tax,absentDed:absDed,lateDed,halfDed,approvedClaims:claims,totalStatutory:sss+phic+hdmf,totalEmployerCost,netPay:net});
-  closeModal('editPayrollModal');
-  toast('Payroll updated successfully!');
-  renderPayroll();
-}
-
-// ═══════════════════════════════════════════════
-// PAYSLIP VIEW
-// ═══════════════════════════════════════════════
-function viewPayslip(payrollId){
-  const p=DB.payroll.find(x=>x.id===payrollId);
-  if(!p)return;
-  const emp=DB.employees.find(e=>e.id===p.empId);
-  if(!emp)return;
-  document.getElementById('payslipContent').innerHTML=`
-    <div style="padding:32px;font-family:'Inter',sans-serif">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #f0dde4">
-        <div><h2 style="font-family:'Playfair Display',serif;color:#7a1c3a;font-size:22px">I-BG Group of Companies</h2><p style="color:#9a7f87;font-size:12px">HR & Payroll Department</p></div>
-        <div style="text-align:right"><div style="font-weight:700;color:#7a1c3a;font-size:16px">PAYSLIP</div><div style="font-size:12px;color:#9a7f87">${monthLabel(p.month)}</div><div style="font-size:11px;color:#9a7f87">Processed: ${fmtDate(p.processedDate)}</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
-        <div><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Employee</p><p style="font-weight:700;font-size:16px">${emp.name}</p><p style="color:#9a7f87;font-size:12px">${emp.position} · ${emp.dept}</p><p style="color:#9a7f87;font-size:12px">${emp.id} · ${emp.emptype}</p><p style="color:#9a7f87;font-size:11px;margin-top:2px">${emp.company||'I-BG Consultancy &amp; Trading (S) Pte Ltd'}</p></div>
-        <div style="text-align:right"><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Net Pay</p><p style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#7a1c3a">${fmt(p.netPay)}</p></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
-        <div>
-          <p style="font-weight:700;color:#7a1c3a;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px">Earnings</p>
-          ${row('Basic Salary',fmt(emp.salary))}
-          ${parseFloat(p.otPay)>0?row('Overtime Pay',fmt(p.otPay)):''}
-          ${parseFloat(p.restPay)>0?row('Rest Day Pay',fmt(p.restPay)):''}
-          ${row('Rice Subsidy',fmt(emp.rice))}
-          ${parseFloat(emp.trans)>0?row('Transportation',fmt(emp.trans)):''}
-          ${parseFloat(emp.phone)>0?row('Phone Allowance',fmt(emp.phone)):''}
-          ${parseFloat(p.approvedClaims)>0?row('Approved Claims',fmt(p.approvedClaims)):''}
-          <div style="border-top:1px solid #f0dde4;margin-top:8px;padding-top:8px">${row('Gross Pay',`<strong>${fmt(p.grossPay)}</strong>`)}</div>
-        </div>
-        <div>
-          <p style="font-weight:700;color:#7a1c3a;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px">Deductions</p>
-          <div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Statutory Contributions (Employee Share)</div>
-          ${row('SSS',fmt(p.sss))}${row('PhilHealth',fmt(p.phic))}${row('Pag-IBIG',fmt(p.hdmf))}
-          <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4">
-            <div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Withholding Tax (TRAIN Law)</div>
-            <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;color:#9a7f87"><span>Taxable Income</span><span>${fmt(p.taxableIncome||0)}</span></div>
-            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">Withholding Tax</span><span style="${parseFloat(p.withholdingTax)>0?'color:#dc3545;font-weight:600':'color:#28a745'}">${parseFloat(p.withholdingTax)>0?fmt(p.withholdingTax):'₱0.00 — Exempt'}</span></div>
-          </div>
-          ${parseFloat(p.absentDed)>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4"><div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Other Deductions</div>`:''}
-          ${parseFloat(p.absentDed)>0?row('Absent Deduction',fmt(p.absentDed)):''}
-          ${parseFloat(p.lateDed)>0?row('Late Deduction',fmt(p.lateDed)):''}
-          ${parseFloat(p.halfDed)>0?row('Half Day Deduction',fmt(p.halfDed)):''}
-          ${parseFloat(p.absentDed)>0?'</div>':''}
-          <div style="border-top:1px solid #f0dde4;margin-top:8px;padding-top:8px">${row('Total Deductions',`<strong>${fmt(parseFloat(p.totalStatutory)+parseFloat(p.withholdingTax)+parseFloat(p.absentDed)+parseFloat(p.lateDed)+parseFloat(p.halfDed))}</strong>`)}</div>
-          ${(parseFloat(p.sssEr||0)+parseFloat(p.phicEr||0)+parseFloat(p.hdmfEr||0))>0?`
-          <div style="margin-top:14px;padding:10px 12px;background:#f0faf3;border-radius:8px;border:1px solid #c3e6cb">
-            <div style="font-size:10px;color:#155724;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Employer Contributions (not deducted)</div>
-            ${row(`<span style="color:#155724">SSS</span>`,`<span style="color:#155724">${fmt(p.sssEr||0)}</span>`)}
-            ${row(`<span style="color:#155724">PhilHealth</span>`,`<span style="color:#155724">${fmt(p.phicEr||0)}</span>`)}
-            ${row(`<span style="color:#155724">Pag-IBIG</span>`,`<span style="color:#155724">${fmt(p.hdmfEr||0)}</span>`)}
-            <div style="border-top:1px solid #c3e6cb;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#155724;font-weight:700">Total Employer Cost</span><span style="color:#155724;font-weight:700">${fmt(p.totalEmployerCost||0)}</span></div>
-          </div>`:''}
-
-        </div>
-      </div>
-      <div style="margin-top:20px;padding:16px 20px;background:#fdf3f6;border-radius:12px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-weight:700;color:#7a1c3a;font-size:15px">NET PAY</span>
-        <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7a1c3a">${fmt(p.netPay)}</span>
-      </div>
-      <p style="font-size:10px;color:#9a7f87;margin-top:16px;text-align:center">This is a computer-generated payslip. No signature required. · Withholding tax computed per TRAIN Law (RA 10963). Employees earning ≤ ₱250,000/year are tax-exempt.</p>
-    </div>`;
-  openModal('payslipModal');
-}
-function row(label,val){return`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">${label}</span><span>${val}</span></div>`;}
-
-// ═══════════════════════════════════════════════
-// RENDER: PAYSLIPS (admin)
-// ═══════════════════════════════════════════════
-function renderPayslips(){
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">All Payslips</div></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Month</th><th>Gross Pay</th><th>Deductions</th><th>Net Pay</th><th>Processed</th><th></th></tr></thead><tbody>
-    ${DB.payroll.length?DB.payroll.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr>
-      <td>${e?e.name:'—'}</td><td>${monthLabel(p.month)}</td><td>${fmt(p.grossPay)}</td>
-      <td>${fmt(parseFloat(p.totalStatutory)+parseFloat(p.withholdingTax))}</td>
-      <td><strong>${fmt(p.netPay)}</strong></td><td>${fmtDate(p.processedDate)}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️ View</button></td>
-    </tr>`}).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📄</div>No payslips yet. Process payroll first.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: 13TH MONTH PAY
-// ═══════════════════════════════════════════════
-function renderThirteenth(){
-  const year=currentMonth().split('-')[0];
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">13th Month Pay — ${year}</div><div class="section-sub">Non-taxable up to ₱90,000 (TRAIN Law)</div></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Months Worked</th><th>Total Basic Earned</th><th>13th Month Pay</th><th>Non-Taxable</th><th>Taxable Portion</th></tr></thead><tbody>
-    ${DB.employees.filter(e=>e.status==='Active').map(e=>{
-      const monthsWorked=DB.payroll.filter(p=>p.empId===e.id&&p.month.startsWith(year)).length;
-      const totalBasic=monthsWorked*e.salary;
-      const thirteenth=totalBasic/12;
-      const nonTax=Math.min(thirteenth,90000);
-      const taxable=Math.max(0,thirteenth-90000);
-      return`<tr><td>${esc(e.name)}</td><td>${monthsWorked}</td><td>${fmt(totalBasic)}</td><td><strong>${fmt(thirteenth)}</strong></td><td>${fmt(nonTax)}</td><td>${taxable>0?fmt(taxable):'—'}</td></tr>`;
-    }).join('')||'<tr><td colspan="6" class="no-data">No active employees.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-// ═══════════════════════════════════════════════
-// RENDER: REPORTS
-// ═══════════════════════════════════════════════
-function renderReports(){
-  const m=currentMonth();
-  const monthPay=DB.payroll.filter(p=>p.month===m);
-  const totalGross=monthPay.reduce((s,p)=>s+parseFloat(p.grossPay||0),0);
-  const totalNet=monthPay.reduce((s,p)=>s+parseFloat(p.netPay||0),0);
-  const totalSSS=monthPay.reduce((s,p)=>s+parseFloat(p.sss||0),0);
-  const totalPhic=monthPay.reduce((s,p)=>s+parseFloat(p.phic||0),0);
-  const totalHdmf=monthPay.reduce((s,p)=>s+parseFloat(p.hdmf||0),0);
-  const totalTax=monthPay.reduce((s,p)=>s+parseFloat(p.withholdingTax||0),0);
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">Payroll Report — ${monthLabel(m)}</div></div></div>
-    <div class="cards">
-      <div class="card maroon"><div class="card-accent"></div><div class="card-icon">💰</div><div class="card-val" style="font-size:20px">${fmt(totalGross)}</div><div class="card-label">Total Gross Payroll</div></div>
-      <div class="card green"><div class="card-accent"></div><div class="card-icon">✅</div><div class="card-val" style="font-size:20px">${fmt(totalNet)}</div><div class="card-label">Total Net Payroll</div></div>
-      <div class="card amber"><div class="card-accent"></div><div class="card-icon">🏛️</div><div class="card-val" style="font-size:20px">${fmt(totalSSS+totalPhic+totalHdmf)}</div><div class="card-label">Statutory Deductions</div></div>
-      <div class="card purple"><div class="card-accent"></div><div class="card-icon">📋</div><div class="card-val" style="font-size:20px">${fmt(totalTax)}</div><div class="card-label">Withholding Tax</div></div>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Gross</th><th>SSS (EE)</th><th>SSS (ER)</th><th>PhilHealth (EE)</th><th>PhilHealth (ER)</th><th>Pag-IBIG (EE)</th><th>Pag-IBIG (ER)</th><th>Tax</th><th>Net Pay</th><th style="color:#28a745">Employer Cost</th></tr></thead><tbody>
-    ${monthPay.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr><td>${e?esc(e.name):'—'}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.sss)}</td><td style="color:#28a745">${fmt(p.sssEr||0)}</td><td>${fmt(p.phic)}</td><td style="color:#28a745">${fmt(p.phicEr||0)}</td><td>${fmt(p.hdmf)}</td><td style="color:#28a745">${fmt(p.hdmfEr||0)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td style="color:#28a745"><strong>${fmt(p.totalEmployerCost||0)}</strong></td></tr>`;}).join('')||'<tr><td colspan="11" class="no-data">No payroll processed for this month.</td></tr>'}
-    ${monthPay.length?`<tr style="background:var(--blush)"><td><strong>TOTAL</strong></td><td><strong>${fmt(totalGross)}</strong></td><td><strong>${fmt(totalSSS)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.sssEr||0),0))}</strong></td><td><strong>${fmt(totalPhic)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.phicEr||0),0))}</strong></td><td><strong>${fmt(totalHdmf)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.hdmfEr||0),0))}</strong></td><td><strong>${fmt(totalTax)}</strong></td><td><strong>${fmt(totalNet)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.totalEmployerCost||0),0))}</strong></td></tr>`:''}
-    </tbody></table></div>`;
-}
-
-// ═══════════════════════════════════════════════
-// EMPLOYEE SELF-SERVICE PAGES
-// ═══════════════════════════════════════════════
-function leaveAccumCard(label,icon,used){
-  return`<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;align-items:center;gap:7px">
-      <span style="font-size:18px">${icon}</span>
-      <span style="font-size:11px;color:#9a7f87;font-weight:600;text-transform:uppercase;letter-spacing:.4px;line-height:1.3">${label}</span>
-    </div>
-    <div style="display:flex;align-items:baseline;gap:5px">
-      <span style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#5a6268">${used}</span>
-      <span style="font-size:12px;color:#9a7f87">day(s) used</span>
-    </div>
-    <div style="font-size:10px;color:#9a7f87;background:#f8f9fa;border-radius:6px;padding:3px 8px;text-align:center">Accumulated · no fixed cap</div>
-  </div>`;
-}
-function leaveBalanceCard(label,icon,total,used){
-  const remaining=Math.max(0,total-used);
-  const pct=total>0?Math.min(100,Math.round((used/total)*100)):0;
-  const barColor=remaining===0?'#dc3545':remaining<=2?'#fd7e14':'#28a745';
-  const bgBar=remaining===0?'#fde8e8':remaining<=2?'#fff3cd':'#e8f5e9';
-  return`<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px 18px;display:flex;flex-direction:column;gap:8px">
-    <div style="display:flex;align-items:center;gap:7px">
-      <span style="font-size:18px">${icon}</span>
-      <span style="font-size:11px;color:#9a7f87;font-weight:600;text-transform:uppercase;letter-spacing:.4px;line-height:1.3">${label}</span>
-    </div>
-    <div style="display:flex;align-items:baseline;gap:5px">
-      <span style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:${barColor}">${remaining}</span>
-      <span style="font-size:12px;color:#9a7f87">/ ${total} days left</span>
-    </div>
-    <div style="background:${bgBar};border-radius:4px;height:5px;overflow:hidden">
-      <div style="height:5px;border-radius:4px;background:${barColor};width:${100-pct}%;transition:width .3s"></div>
-    </div>
-    <div style="font-size:10px;color:#9a7f87">${used} day(s) used of ${total}</div>
-  </div>`;
-}
-function renderMyLeaves(){
-  const myLeaves=DB.leaves.filter(l=>l.empId===currentEmployee.id);
-  const approved=myLeaves.filter(l=>l.status==='Approved');
-  const pending=myLeaves.filter(l=>l.status==='Pending');
-  const rejected=myLeaves.filter(l=>l.status==='Rejected');
-  // Only Approved leaves reduce the balance
-  function usedDays(type){return approved.filter(l=>l.type===type).reduce((s,l)=>s+daysBetween(l.from,l.to),0);}
-  const usedAL=usedDays('Annual Leave');
-  const usedSL=usedDays('Sick Leave');
-  const usedCL=usedDays('Compassionate Leave');
-  const usedHIL=usedDays('Holiday in Lieu');
-  const usedOIL=usedDays('Off in Lieu');
-  const usedSIL=usedDays('Service Incentive Leave (SIL)');
-  const usedML=usedDays('Maternity Leave');
-  const usedPL=usedDays('Paternity Leave');
-  const usedSPL=usedDays('Solo Parent Leave');
-  const usedSLW=usedDays('Special Leave for Women');
-  const usedVAWC=usedDays('VAWC Leave');
-  const usedSEL=usedDays('Special Emergency Leave');
-  function leaveSectionHeader(emoji,label,count){
-    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #f5e6ea">
-      <span style="font-size:17px">${emoji}</span>
-      <span style="font-size:12px;font-weight:700;color:var(--maroon);text-transform:uppercase;letter-spacing:.6px">${label}</span>
-      <span style="font-size:11px;color:#9a7f87;background:#f5e6ea;border-radius:10px;padding:2px 9px;font-weight:600;margin-left:auto">${count} types</span>
-    </div>`;
-  }
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div>
-        <div class="section-title">My Leaves</div>
-        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
-          <span style="background:#f5e6ea;color:var(--maroon);border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${myLeaves.length} Total</span>
-          <span style="background:#fff3cd;color:#856404;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">⏳ ${pending.length} Pending</span>
-          <span style="background:#d4edda;color:#155724;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">✅ ${approved.length} Approved</span>
-          ${rejected.length?`<span style="background:#f8d7da;color:#721c24;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">❌ ${rejected.length} Rejected</span>`:''}
-        </div>
-      </div>
-      <button class="btn btn-primary" onclick="openMyLeaveModal()">+ File Leave</button>
-    </div>
-
-    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:20px 22px;margin-bottom:16px">
-      ${leaveSectionHeader('🏢','Company Leaves',5)}
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
-        ${leaveBalanceCard('Annual Leave','🌴',10,usedAL)}
-        ${leaveBalanceCard('Sick Leave','🏥',5,usedSL)}
-        ${leaveBalanceCard('Compassionate Leave','🤍',3,usedCL)}
-        ${leaveAccumCard('Holiday in Lieu','🔄',usedHIL)}
-        ${leaveAccumCard('Off in Lieu','⏰',usedOIL)}
-      </div>
-    </div>
-
-    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:20px 22px;margin-bottom:16px">
-      ${leaveSectionHeader('🇵🇭','Philippine Statutory Leaves',7)}
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
-        ${leaveBalanceCard('Service Incentive Leave','⭐',5,usedSIL)}
-        ${leaveBalanceCard('Maternity Leave','🤱',105,usedML)}
-        ${leaveBalanceCard('Paternity Leave','👨‍🍼',7,usedPL)}
-        ${leaveBalanceCard('Solo Parent Leave','👨‍👧',7,usedSPL)}
-        ${leaveBalanceCard('Special Leave (Women)','🌸',60,usedSLW)}
-        ${leaveBalanceCard('VAWC Leave','💜',10,usedVAWC)}
-        ${leaveBalanceCard('Special Emergency Leave','🚨',5,usedSEL)}
-      </div>
-      <div style="font-size:11px;color:#9a7f87;margin-top:12px;display:flex;align-items:center;gap:5px">
-        <span>ℹ️</span> Balances based on approved leaves only. Contact HR for adjustments.
-      </div>
-    </div>
-
-    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:20px 22px">
-      ${leaveSectionHeader('📋','Leave History',myLeaves.length)}
-      ${myLeaves.length?`
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:13px">
-          <thead>
-            <tr style="background:#fdf0f3">
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4;white-space:nowrap">Leave Type</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4;white-space:nowrap">From</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4;white-space:nowrap">To</th>
-              <th style="padding:10px 12px;text-align:center;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4">Days</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4">Pay</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4">Status</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4">Reason</th>
-              <th style="padding:10px 12px;text-align:left;font-size:10px;color:#9a7f87;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0dde4;white-space:nowrap">Filed</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${myLeaves.map((l,i)=>`<tr style="background:${i%2===0?'#fff':'#fdf9fb'};border-bottom:1px solid #fce8ed">
-              <td style="padding:10px 12px;font-weight:600;color:var(--maroon)">${l.type}</td>
-              <td style="padding:10px 12px;color:#5a6268;white-space:nowrap">${fmtDate(l.from)}</td>
-              <td style="padding:10px 12px;color:#5a6268;white-space:nowrap">${fmtDate(l.to)}</td>
-              <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--maroon)">${daysBetween(l.from,l.to)}</td>
-              <td style="padding:10px 12px">${l.pay==='1'?'<span style="background:#d4edda;color:#155724;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">With Pay</span>':'<span style="background:#f8d7da;color:#721c24;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">LWOP</span>'}</td>
-              <td style="padding:10px 12px">${statusBadge(l.status)}</td>
-              <td style="padding:10px 12px;color:#5a6268;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.reason||'—'}</td>
-              <td style="padding:10px 12px;color:#9a7f87;font-size:12px;white-space:nowrap">${fmtDate(l.filed)}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>`:`<div style="text-align:center;padding:40px 0;color:#9a7f87">
-        <div style="font-size:40px;margin-bottom:10px">🌿</div>
-        <div style="font-weight:600;font-size:14px;margin-bottom:4px">No leave requests yet</div>
-        <div style="font-size:12px">Click "+ File Leave" above to file your first request.</div>
-      </div>`}
-    </div>`;
-}
-
-function openMyLeaveModal(){
-  const sel=document.getElementById('l_emp');
-  sel.innerHTML=`<option value="${esc(currentEmployee.id)}">${esc(currentEmployee.name)}</option>`;
-  sel.disabled=true;
-  document.getElementById('l_from').value=today();
-  document.getElementById('l_to').value=today();
-  document.getElementById('l_reason').value='';
-  openModal('leaveModal');
-}
-
-function renderMyClaims(){
-  const myClaims=DB.claims.filter(c=>c.empId===currentEmployee.id);
-  document.getElementById('content').innerHTML=`
-    <div class="section-header">
-      <div><div class="section-title">My Expense Claims</div><div class="section-sub">${myClaims.length} total · ${myClaims.filter(c=>c.status==='Pending').length} pending</div></div>
-      <button class="btn btn-primary" onclick="openMyClaimModal()">+ File Claim</button>
-    </div>
-    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Filed</th></tr></thead><tbody>
-    ${myClaims.length?myClaims.map(c=>`<tr>
-      <td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td>
-      <td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
-      <td>${statusBadge(c.status)}</td><td>${fmtDate(c.filed)}</td>
-    </tr>`).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">💼</div>No expense claims yet.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function openMyClaimModal(){
-  const sel=document.getElementById('c_emp');
-  sel.innerHTML=`<option value="${esc(currentEmployee.id)}">${esc(currentEmployee.name)}</option>`;
-  sel.disabled=true;
-  document.getElementById('c_date').value=today();
-  document.getElementById('c_amount').value='';
-  document.getElementById('c_desc').value='';
-  document.getElementById('c_receipt_file').value='';
-  document.getElementById('c_receipt_status').textContent='';
-  openModal('claimModal');
-}
-
-function renderMyPayslips(){
-  const myPayslips=DB.payroll.filter(p=>p.empId===currentEmployee.id).sort((a,b)=>b.month.localeCompare(a.month));
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">My Payslips</div><div class="section-sub">${myPayslips.length} payslips</div></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Period</th><th>Gross Pay</th><th>Deductions</th><th>Net Pay</th><th>Processed</th><th>Payment Status</th><th></th></tr></thead><tbody>
-    ${myPayslips.length?myPayslips.map(p=>`<tr>
-      <td><strong>${monthLabel(p.month)}</strong></td>
-      <td>${fmt(p.grossPay)}</td>
-      <td>${fmt(parseFloat(p.totalStatutory||0)+parseFloat(p.withholdingTax||0))}</td>
-      <td><strong style="color:var(--green)">${fmt(p.netPay)}</strong></td>
-      <td>${fmtDate(p.processedDate)}</td>
-      <td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87">${fmtDate(p.disbursementDate)}</div>`:''}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️ View</button></td>
-    </tr>`).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📄</div>No payslips available yet.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function renderMyProfile(){
-  const e=currentEmployee;
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">My Details</div><div class="section-sub">${e.id}</div></div></div>
-    <div style="max-width:600px;background:#fff;border-radius:12px;border:1px solid var(--border);padding:28px">
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
-        <div style="width:64px;height:64px;border-radius:50%;background:var(--maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${initials(e.name)}</div>
-        <div><div style="font-size:18px;font-weight:700;color:var(--maroon)">${esc(e.name)}</div><div style="color:#9a7f87;font-size:13px">${esc(e.position||'—')} · ${esc(e.dept||'—')}</div><div style="margin-top:4px">${statusBadge(e.status)}</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        ${profileRow('Company',e.company||'I-BG Consultancy & Trading (S) Pte Ltd')}
-        ${profileRow('Employee ID',e.id)}
-        ${profileRow('Employment Type',e.emptype)}
-        ${profileRow('Date Hired',fmtDate(e.hired))}
-        ${profileRow('Basic Salary',fmt(e.salary))}
-        ${profileRow('Email',e.email)}
-        ${profileRow('Phone',e.phone||'—')}
-        ${profileRow('SSS No.',e.sss||'—')}
-        ${profileRow('PhilHealth No.',e.phic||'—')}
-        ${profileRow('Pag-IBIG No.',e.hdmf||'—')}
-        ${profileRow('TIN',e.tin||'—')}
-        ${profileRow('Emergency Contact',e.contact||'—')}
-        ${profileRow('Address',e.address||'—')}
-      </div>
-    </div>`;
-}
-function profileRow(label,val){return`<div><div style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">${label}</div><div style="font-weight:600;color:#3d1a26">${val}</div></div>`;}
-
-function renderMyAttendance(){
-  const m=currentMonth();
-  const myAtt=DB.attendance.filter(a=>a.empId===currentEmployee.id&&a.date&&a.date.startsWith(m));
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">My Attendance — ${monthLabel(m)}</div><div class="section-sub">${myAtt.length} records</div></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hours</th><th>Remarks</th></tr></thead><tbody>
-    ${myAtt.length?myAtt.sort((a,b)=>b.date.localeCompare(a.date)).map(a=>`<tr>
-      <td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
-      <td>${statusBadge(a.status)}</td><td>${a.ot>0?a.ot+' hrs':'—'}</td><td>${a.remarks||'—'}</td>
-    </tr>`).join(''):'<tr><td colspan="6" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
-    </tbody></table></div>`;
-}
-
-function renderMy13th(){
-  const emp=currentEmployee;
-  const allPayroll=DB.payroll.filter(p=>p.empId===emp.id);
-  const year=new Date().getFullYear();
-  const yearPayroll=allPayroll.filter(p=>p.month&&p.month.startsWith(String(year)));
-  const totalBasic=yearPayroll.reduce((s,p)=>s+parseFloat(p.grossPay||0),0);
-  const thirteenth=(totalBasic/12).toFixed(2);
-  const months=yearPayroll.length;
-  document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">My 13th Month Pay — ${year}</div><div class="section-sub">Based on ${months} months processed</div></div></div>
-    <div style="max-width:500px;background:#fff;border-radius:12px;border:1px solid var(--border);padding:28px">
-      <div style="text-align:center;padding:20px 0;border-bottom:1px solid var(--border);margin-bottom:20px">
-        <div style="font-size:13px;color:#9a7f87;margin-bottom:6px">Estimated 13th Month Pay</div>
-        <div style="font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:var(--maroon)">${fmt(thirteenth)}</div>
-        <div style="font-size:12px;color:#9a7f87;margin-top:4px">= Total Basic (${fmt(totalBasic)}) ÷ 12</div>
-      </div>
-      <div style="display:grid;gap:12px">
-        ${yearPayroll.sort((a,b)=>a.month.localeCompare(b.month)).map(p=>`
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fdf6f8;border-radius:8px">
-            <span style="font-weight:600">${monthLabel(p.month)}</span>
-            <span style="color:var(--maroon);font-weight:700">${fmt(p.grossPay)}</span>
-          </div>`).join('')||'<div style="text-align:center;color:#9a7f87;padding:20px">No payroll processed for '+year+' yet.</div>'}
-      </div>
-      ${months<12?`<div style="margin-top:16px;padding:10px 14px;background:#fff3cd;border-radius:8px;font-size:12px;color:#856404">⚠️ ${12-months} month(s) not yet processed — final amount may change.</div>`:''}
-    </div>`;
-}
-
-// ═══════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════
-(async function init(){
-  // Scripts are loaded — enable the login button and hide init message
-  const authBtn = document.getElementById('authBtn');
-  if(authBtn){ authBtn.disabled=false; authBtn.style.opacity=''; authBtn.style.cursor=''; }
-  const initMsg = document.getElementById('appInitMsg');
-  if(initMsg) initMsg.style.display='none';
-  showLoading(false);
-  // Listen for auth state changes
-  sb.auth.onAuthStateChange(async(event,session)=>{
-    if(event==='SIGNED_OUT'){
-      document.getElementById('app').style.display='none';
-      document.getElementById('loginScreen').style.display='flex';
-    }
-  });
-})();
-</script>
-</body>
+</div>
+</div>
+<script crossorigin="anonymous" integrity="sha384-cztVf4nptt4arwI8Ixfn8naubPgxH22BSvA0CuqFUCulIT+dgnb18vSqiZbbPDL1" src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js"></script>
+<script defer src="app.js"></script></body>
 </html>
