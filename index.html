@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I-BG Group — HR & Payroll System</title>
+<link rel="icon" href="/ibg-logo.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js" as="script">
 <style>
@@ -515,8 +516,33 @@ tr:hover td{background:var(--blush2)}
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js" integrity="sha384-cztVf4nptt4arwI8Ixfn8naubPgxH22BSvA0CuqFUCulIT+dgnb18vSqiZbbPDL1" crossorigin="anonymous"></script>
 <script>
+// ── HTML escape helper ──────────────────────────
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+// ── Brute-force login protection ────────────────
+const _BF_MAX = 5;
+const _BF_MS  = 15 * 60 * 1000;
+function _bfGet(){ try{ return JSON.parse(sessionStorage.getItem('_lka')||'{}'); }catch{ return {}; } }
+function _bfFail(){
+  const d=_bfGet(); d.n=(d.n||0)+1;
+  if(d.n>=_BF_MAX) d.u=Date.now()+_BF_MS;
+  sessionStorage.setItem('_lka',JSON.stringify(d));
+}
+function _bfReset(){ sessionStorage.removeItem('_lka'); }
+function _bfMinsLeft(){
+  const d=_bfGet();
+  return (d.u&&Date.now()<d.u)?Math.ceil((d.u-Date.now())/60000):0;
+}
+
 // ═══════════════════════════════════════════════
 // SUPABASE CONFIG
 // ═══════════════════════════════════════════════
@@ -789,13 +815,22 @@ async function doAuth(){
   const pass  = document.getElementById('loginPass').value;
   const err   = document.getElementById('loginErr');
   err.style.display='none';
+
+  const locked = _bfMinsLeft();
+  if(locked>0){
+    err.textContent=`Too many failed attempts. Try again in ${locked} minute${locked>1?'s':''}.`;
+    err.style.display='block';
+    return;
+  }
+
   if(!email||!pass){err.textContent='Please enter your email and password.';err.style.display='block';return;}
   showLoading(true);
   try{
     if(activeTab==='in'){
       // Step 1: verify password
       const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
-      if(error) throw error;
+      if(error){ _bfFail(); throw error; }
+      _bfReset();
       pendingPasswordSession = data.session;
       pendingBioEmail = email;
 
@@ -907,7 +942,7 @@ function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date
 function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
 function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
 
-function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn||null,time_out:r.timeOut||null,status:r.status,ot:r.ot,remarks:r.remarks};}
+function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
 function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
 function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
 function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
@@ -1129,13 +1164,13 @@ function renderDashboard(){
       <div>
         <div class="section-header"><div><div class="section-title">Recent Leaves</div></div></div>
         <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Type</th><th>Status</th></tr></thead><tbody>
-        ${DB.leaves.slice(0,5).map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr><td>${e?e.name.split(',')[0]:'—'}</td><td>${l.type}</td><td>${statusBadge(l.status)}</td></tr>`}).join('')||'<tr><td colspan="3" class="no-data">No leaves filed</td></tr>'}
+        ${DB.leaves.slice(0,5).map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr><td>${e?esc(e.name.split(',')[0]):'—'}</td><td>${esc(l.type)}</td><td>${statusBadge(l.status)}</td></tr>`}).join('')||'<tr><td colspan="3" class="no-data">No leaves filed</td></tr>'}
         </tbody></table></div>
       </div>
       <div>
         <div class="section-header"><div><div class="section-title">Recent Claims</div></div></div>
         <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Category</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-        ${DB.claims.slice(0,5).map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr><td>${e?e.name.split(',')[0]:'—'}</td><td>${c.category}</td><td>${fmt(c.amount)}</td><td>${statusBadge(c.status)}</td></tr>`}).join('')||'<tr><td colspan="4" class="no-data">No claims filed</td></tr>'}
+        ${DB.claims.slice(0,5).map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr><td>${e?esc(e.name.split(',')[0]):'—'}</td><td>${esc(c.category)}</td><td>${fmt(c.amount)}</td><td>${statusBadge(c.status)}</td></tr>`}).join('')||'<tr><td colspan="4" class="no-data">No claims filed</td></tr>'}
         </tbody></table></div>
       </div>
     </div>`;
@@ -1153,7 +1188,7 @@ function renderEmployees(){
     <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Company</th><th>Position</th><th>Department</th><th>Type</th><th>Basic Salary</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.employees.length?DB.employees.map(e=>`<tr>
       <td><strong>${e.id}</strong></td>
-      <td>${e.name}</td>
+      <td>${esc(e.name)}</td>
       <td style="font-size:11px;max-width:140px">${e.company?`<span style="display:inline-block;padding:2px 7px;border-radius:20px;background:${e.company.includes('Corporation')?'#fff3cd':'#d4edff'};color:${e.company.includes('Corporation')?'#856404':'#0c5460'};font-weight:600">${e.company.includes('Corporation')?'IBG PH':'IBG SG'}</span>`:'—'}</td>
       <td>${e.position||'—'}</td>
       <td>${e.dept||'—'}</td>
@@ -1297,7 +1332,7 @@ function renderAttendance(){
 
 function openAttModal(){
   const sel=document.getElementById('a_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
   document.getElementById('a_date').value=today();
   openModal('attModal');
 }
@@ -1349,7 +1384,7 @@ function renderLeaves(){
 
 function openLeaveModal(preEmpId){
   const sel=document.getElementById('l_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
   if(preEmpId)sel.value=preEmpId;
   document.getElementById('l_from').value=today();
   document.getElementById('l_to').value=today();
@@ -1424,7 +1459,7 @@ function renderClaims(){
 
 function openClaimModal(preEmpId){
   const sel=document.getElementById('c_emp');
-  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  sel.innerHTML=DB.employees.filter(e=>e.status==='Active').map(e=>`<option value="${esc(e.id)}">${esc(e.name)}</option>`).join('');
   if(preEmpId)sel.value=preEmpId;
   sel.disabled=false;
   document.getElementById('c_date').value=today();
@@ -1503,9 +1538,9 @@ function renderPayroll(){
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
     ${activeEmps.map(e=>{
       const p=processed.find(x=>x.empId===e.id);
-      if(p)return`<tr><td><strong>${e.id}</strong> ${e.name.split(',')[0]}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> <button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}</td></tr>`;
+      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> <button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}</td></tr>`;
       const comp=computePayroll(e,m);
-      return`<tr><td><strong>${e.id}</strong> ${e.name.split(',')[0]}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td><button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button></td></tr>`;
+      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td><button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button></td></tr>`;
     }).join('')||'<tr><td colspan="10" class="no-data">No active employees.</td></tr>'}
     </tbody>
     ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="6" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} employees)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
@@ -1784,7 +1819,7 @@ function renderThirteenth(){
       const thirteenth=totalBasic/12;
       const nonTax=Math.min(thirteenth,90000);
       const taxable=Math.max(0,thirteenth-90000);
-      return`<tr><td>${e.name}</td><td>${monthsWorked}</td><td>${fmt(totalBasic)}</td><td><strong>${fmt(thirteenth)}</strong></td><td>${fmt(nonTax)}</td><td>${taxable>0?fmt(taxable):'—'}</td></tr>`;
+      return`<tr><td>${esc(e.name)}</td><td>${monthsWorked}</td><td>${fmt(totalBasic)}</td><td><strong>${fmt(thirteenth)}</strong></td><td>${fmt(nonTax)}</td><td>${taxable>0?fmt(taxable):'—'}</td></tr>`;
     }).join('')||'<tr><td colspan="6" class="no-data">No active employees.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -1810,7 +1845,7 @@ function renderReports(){
       <div class="card purple"><div class="card-accent"></div><div class="card-icon">📋</div><div class="card-val" style="font-size:20px">${fmt(totalTax)}</div><div class="card-label">Withholding Tax</div></div>
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Gross</th><th>SSS (EE)</th><th>SSS (ER)</th><th>PhilHealth (EE)</th><th>PhilHealth (ER)</th><th>Pag-IBIG (EE)</th><th>Pag-IBIG (ER)</th><th>Tax</th><th>Net Pay</th><th style="color:#28a745">Employer Cost</th></tr></thead><tbody>
-    ${monthPay.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr><td>${e?e.name:'—'}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.sss)}</td><td style="color:#28a745">${fmt(p.sssEr||0)}</td><td>${fmt(p.phic)}</td><td style="color:#28a745">${fmt(p.phicEr||0)}</td><td>${fmt(p.hdmf)}</td><td style="color:#28a745">${fmt(p.hdmfEr||0)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td style="color:#28a745"><strong>${fmt(p.totalEmployerCost||0)}</strong></td></tr>`;}).join('')||'<tr><td colspan="11" class="no-data">No payroll processed for this month.</td></tr>'}
+    ${monthPay.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr><td>${e?esc(e.name):'—'}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.sss)}</td><td style="color:#28a745">${fmt(p.sssEr||0)}</td><td>${fmt(p.phic)}</td><td style="color:#28a745">${fmt(p.phicEr||0)}</td><td>${fmt(p.hdmf)}</td><td style="color:#28a745">${fmt(p.hdmfEr||0)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td style="color:#28a745"><strong>${fmt(p.totalEmployerCost||0)}</strong></td></tr>`;}).join('')||'<tr><td colspan="11" class="no-data">No payroll processed for this month.</td></tr>'}
     ${monthPay.length?`<tr style="background:var(--blush)"><td><strong>TOTAL</strong></td><td><strong>${fmt(totalGross)}</strong></td><td><strong>${fmt(totalSSS)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.sssEr||0),0))}</strong></td><td><strong>${fmt(totalPhic)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.phicEr||0),0))}</strong></td><td><strong>${fmt(totalHdmf)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.hdmfEr||0),0))}</strong></td><td><strong>${fmt(totalTax)}</strong></td><td><strong>${fmt(totalNet)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.totalEmployerCost||0),0))}</strong></td></tr>`:''}
     </tbody></table></div>`;
 }
@@ -1958,7 +1993,7 @@ function renderMyLeaves(){
 
 function openMyLeaveModal(){
   const sel=document.getElementById('l_emp');
-  sel.innerHTML=`<option value="${currentEmployee.id}">${currentEmployee.name}</option>`;
+  sel.innerHTML=`<option value="${esc(currentEmployee.id)}">${esc(currentEmployee.name)}</option>`;
   sel.disabled=true;
   document.getElementById('l_from').value=today();
   document.getElementById('l_to').value=today();
@@ -1985,7 +2020,7 @@ function renderMyClaims(){
 
 function openMyClaimModal(){
   const sel=document.getElementById('c_emp');
-  sel.innerHTML=`<option value="${currentEmployee.id}">${currentEmployee.name}</option>`;
+  sel.innerHTML=`<option value="${esc(currentEmployee.id)}">${esc(currentEmployee.name)}</option>`;
   sel.disabled=true;
   document.getElementById('c_date').value=today();
   document.getElementById('c_amount').value='';
@@ -2019,7 +2054,7 @@ function renderMyProfile(){
     <div style="max-width:600px;background:#fff;border-radius:12px;border:1px solid var(--border);padding:28px">
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
         <div style="width:64px;height:64px;border-radius:50%;background:var(--maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${initials(e.name)}</div>
-        <div><div style="font-size:18px;font-weight:700;color:var(--maroon)">${e.name}</div><div style="color:#9a7f87;font-size:13px">${e.position||'—'} · ${e.dept||'—'}</div><div style="margin-top:4px">${statusBadge(e.status)}</div></div>
+        <div><div style="font-size:18px;font-weight:700;color:var(--maroon)">${esc(e.name)}</div><div style="color:#9a7f87;font-size:13px">${esc(e.position||'—')} · ${esc(e.dept||'—')}</div><div style="margin-top:4px">${statusBadge(e.status)}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         ${profileRow('Company',e.company||'I-BG Consultancy & Trading (S) Pte Ltd')}
@@ -2043,34 +2078,7 @@ function profileRow(label,val){return`<div><div style="font-size:11px;color:#9a7
 function renderMyAttendance(){
   const m=currentMonth();
   const myAtt=DB.attendance.filter(a=>a.empId===currentEmployee.id&&a.date&&a.date.startsWith(m));
-  const todayStr=today();
-  const todayAtt=DB.attendance.find(a=>a.empId===currentEmployee.id&&a.date===todayStr);
-  const nowTime=new Date().toTimeString().slice(0,5);
-
-  let clockPanel='';
-  if(!todayAtt){
-    clockPanel=`<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
-      <div><div style="font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px">Today — ${fmtDate(todayStr)}</div>
-      <div style="font-size:28px;font-weight:700;color:var(--dark);font-family:'Playfair Display',serif" id="liveClock">${nowTime}</div></div>
-      <button class="btn btn-primary" onclick="doClockIn()" style="padding:12px 32px;font-size:15px;font-weight:700">🕐 Time In</button>
-    </div>`;
-  } else if(!todayAtt.timeOut){
-    clockPanel=`<div style="background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px">
-      <div><div style="font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:.5px">Today — ${fmtDate(todayStr)}</div>
-      <div style="font-size:28px;font-weight:700;color:var(--dark);font-family:'Playfair Display',serif" id="liveClock">${nowTime}</div>
-      <div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:600">✅ Clocked in at ${todayAtt.timeIn}</div></div>
-      <button class="btn" style="background:var(--green);color:#fff;padding:12px 32px;font-size:15px;font-weight:700;border-radius:12px;border:none;cursor:pointer" onclick="doClockOut('${todayAtt.id}')">🕔 Time Out</button>
-    </div>`;
-  } else {
-    clockPanel=`<div style="background:var(--green-light);border-radius:12px;border:1px solid #b2dfdb;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;gap:14px">
-      <span style="font-size:28px">✅</span>
-      <div><div style="font-weight:700;color:var(--green);font-size:14px">Attendance complete for today</div>
-      <div style="font-size:12px;color:var(--green);margin-top:2px">Time In: ${todayAtt.timeIn} &nbsp;·&nbsp; Time Out: ${todayAtt.timeOut}</div></div>
-    </div>`;
-  }
-
   document.getElementById('content').innerHTML=`
-    ${clockPanel}
     <div class="section-header"><div><div class="section-title">My Attendance — ${monthLabel(m)}</div><div class="section-sub">${myAtt.length} records</div></div></div>
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hours</th><th>Remarks</th></tr></thead><tbody>
     ${myAtt.length?myAtt.sort((a,b)=>b.date.localeCompare(a.date)).map(a=>`<tr>
@@ -2078,37 +2086,6 @@ function renderMyAttendance(){
       <td>${statusBadge(a.status)}</td><td>${a.ot>0?a.ot+' hrs':'—'}</td><td>${a.remarks||'—'}</td>
     </tr>`).join(''):'<tr><td colspan="6" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
     </tbody></table></div>`;
-
-  // Live clock tick
-  const _tick=()=>{const el=document.getElementById('liveClock');if(el)el.textContent=new Date().toTimeString().slice(0,5);};
-  if(!todayAtt||!todayAtt.timeOut){const _iv=setInterval(()=>{if(!document.getElementById('liveClock')){clearInterval(_iv);}else{_tick();}},1000);}
-}
-
-async function doClockIn(){
-  const nowT=new Date().toTimeString().slice(0,5);
-  const todayStr=today();
-  const[h,mn]=nowT.split(':').map(Number);
-  const status=(h>9||(h===9&&mn>0))?'Late':'Present';
-  const att={id:uid(),empId:currentEmployee.id,date:todayStr,timeIn:nowT,timeOut:'',status,ot:0,remarks:''};
-  showLoading(true);
-  const{error}=await sb.from('attendance').insert(denormAtt(att));
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  DB.attendance.unshift(att);
-  toast('Clocked in at '+nowT+'!');
-  renderMyAttendance();
-}
-
-async function doClockOut(id){
-  const nowT=new Date().toTimeString().slice(0,5);
-  showLoading(true);
-  const{error}=await sb.from('attendance').update({time_out:nowT}).eq('id',id);
-  showLoading(false);
-  if(error){toast(error.message,'error');return;}
-  const rec=DB.attendance.find(a=>a.id===id);
-  if(rec)rec.timeOut=nowT;
-  toast('Clocked out at '+nowT+'!');
-  renderMyAttendance();
 }
 
 function renderMy13th(){
