@@ -103,7 +103,8 @@ const sb = (function(){
         const r=await gof('/verify',{method:'POST',body:JSON.stringify({email,token,type:'email'})});
         if(!r.error&&r.data){_sess=r.data;_ev.forEach(cb=>cb('SIGNED_IN',_sess));}
         return r.error?r:{data:{session:r.data,user:r.data?.user},error:null};
-      }
+      },
+      resetPassword:async(email)=>gof('/recover',{method:'POST',body:JSON.stringify({email})})
     }
   };
 })();
@@ -286,6 +287,7 @@ function switchTab(t){
   document.getElementById('tabSignIn').classList.toggle('active', t==='in');
   document.getElementById('tabSignUp').classList.toggle('active', t==='up');
   document.getElementById('signUpFields').style.display = t==='up'?'block':'none';
+  document.getElementById('forgotPasswordLink').style.display = t==='in'?'block':'none';
   document.getElementById('authBtn').textContent = t==='in'?'Sign In →':'Create Account →';
   document.getElementById('loginErr').style.display='none';
 }
@@ -358,6 +360,26 @@ async function doAuth(){
       msg='Sign in failed. Please check your email and password.';
     err.textContent = msg;
     err.style.display='block';
+  }
+}
+
+async function forgotPassword(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const err = document.getElementById('loginErr');
+  if(!email){
+    err.style.cssText='display:block';
+    err.textContent='Enter your company email above, then click Forgot Password.';
+    return;
+  }
+  showLoading(true);
+  const {error} = await sb.auth.resetPassword(email);
+  showLoading(false);
+  if(error){
+    err.style.cssText='display:block';
+    err.textContent=error.message||'Could not send reset email. Try again.';
+  } else {
+    err.style.cssText='display:block;background:#e8f7f1;color:#2d8a5e;border-left-color:#2d8a5e';
+    err.textContent='✅ Password reset email sent — check your inbox.';
   }
 }
 
