@@ -85,6 +85,13 @@ const sb = (function(){
     rpc:(fn,p)=>pgf('/rpc/'+fn,{method:'POST',body:JSON.stringify(p)}),
     auth:{
       getSession:async()=>({data:{session:_sess},error:null}),
+      setSession:async({access_token,refresh_token})=>{
+        const r=await gof('/user',{method:'GET',headers:{'Authorization':'Bearer '+access_token}});
+        if(r.error)return r;
+        _sess={access_token,refresh_token,user:r.data};
+        _ev.forEach(cb=>cb('SIGNED_IN',_sess));
+        return{data:{session:_sess,user:r.data},error:null};
+      },
       signInWithPassword:async({email,password})=>{
         const r=await gof('/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});
         if(!r.error){_sess=r.data;_ev.forEach(cb=>cb('SIGNED_IN',_sess));}
@@ -1634,6 +1641,17 @@ function renderMy13th(){
       document.getElementById('loginScreen').style.display='flex';
     }
   });
+
+  // STIV SSO bridge — reached with an access/refresh token pair in the URL
+  // fragment (never sent to any server) when opened from the STIV Systems
+  // panel, which mints the session server-side using credentials it holds.
+  const hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
+  const ssoAccess=hashParams.get('access_token'), ssoRefresh=hashParams.get('refresh_token');
+  if(ssoAccess&&ssoRefresh){
+    history.replaceState({},'',location.pathname+location.search);
+    const r=await sb.auth.setSession({access_token:ssoAccess,refresh_token:ssoRefresh});
+    if(!r.error){await initApp(r.data.session);}
+  }
 })();
 
 // ── Event bindings (extracted from inline HTML handlers) ──
