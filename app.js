@@ -477,12 +477,12 @@ function toast(msg,type='success'){
 function normAtt(r){return{id:r.id,empId:r.emp_id,date:r.date,timeIn:r.time_in,timeOut:r.time_out,status:r.status,ot:r.ot,remarks:r.remarks};}
 function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date,to:r.to_date,reason:r.reason,pay:r.pay,status:r.status,filed:r.filed_date};}
 function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
-function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
+function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
 
 function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
 function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
 function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
-function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
+function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
 
 // ═══════════════════════════════════════════════
 // LOAD DATA FROM SUPABASE
@@ -567,9 +567,37 @@ function computeTax(ti){
   if(ti<=666666)return Math.round(40833+(ti-166667)*0.32);
   return Math.round(200833+(ti-666667)*0.35);
 }
-function computePayroll(emp,month){
-  const workDays=22,daily=emp.salary/workDays,hourly=daily/8;
-  const atts=DB.attendance.filter(a=>a.empId===emp.id&&a.date.startsWith(month));
+// Same PH TRAIN annual brackets, thresholds/bases halved for 24 pay periods/year
+// instead of 12 — the standard BIR semi-monthly withholding approach (not just
+// "monthly tax ÷ 2", which would mask a half with heavier OT/absences than the other).
+function computeTaxSemiMonthly(ti){
+  if(ti<=10417)return 0;
+  if(ti<=16666)return Math.round((ti-10417)*0.20);
+  if(ti<=33333)return Math.round(1250+(ti-16667)*0.25);
+  if(ti<=83333)return Math.round(5417+(ti-33333)*0.30);
+  if(ti<=333333)return Math.round(20417+(ti-83333)*0.32);
+  return Math.round(100417+(ti-333333)*0.35);
+}
+function daysInMonth(year,month){return new Date(year,month,0).getDate();}
+function periodDateRange(month,period){
+  const [y,m]=month.split('-').map(Number);
+  const last=daysInMonth(y,m);
+  if(period==='1')return{start:month+'-01',end:month+'-15'};
+  if(period==='2')return{start:month+'-16',end:month+'-'+String(last).padStart(2,'0')};
+  return{start:month+'-01',end:month+'-'+String(last).padStart(2,'0')};
+}
+function daysOverlap(aStart,aEnd,bStart,bEnd){
+  const start=aStart>bStart?aStart:bStart;
+  const end=aEnd<bEnd?aEnd:bEnd;
+  if(start>end)return 0;
+  return daysBetween(start,end);
+}
+function computePayroll(emp,month,period='full'){
+  const isHalf=period==='1'||period==='2';
+  const{start,end}=periodDateRange(month,period);
+  const workDays=isHalf?11:22,periodSalary=isHalf?emp.salary/2:emp.salary;
+  const daily=periodSalary/workDays,hourly=daily/8;
+  const atts=DB.attendance.filter(a=>a.empId===emp.id&&a.date>=start&&a.date<=end);
   let absent=0,lateHrs=0,halfDay=0,otHours=0,restDays=0;
   atts.forEach(a=>{
     if(a.status==='Absent')absent++;
@@ -578,23 +606,31 @@ function computePayroll(emp,month){
     else if(a.status==='Rest Day Work')restDays++;
     otHours+=parseFloat(a.ot||0);
   });
-  const lwop=DB.leaves.filter(l=>l.empId===emp.id&&l.status==='Approved'&&l.pay==='0'&&l.from&&l.from.startsWith(month)).reduce((s,l)=>s+daysBetween(l.from,l.to),0);
+  const lwop=DB.leaves.filter(l=>l.empId===emp.id&&l.status==='Approved'&&l.pay==='0'&&l.from&&l.to).reduce((s,l)=>s+daysOverlap(l.from,l.to,start,end),0);
   const absentDed=(absent+lwop)*daily,lateDed=lateHrs*hourly,halfDed=halfDay*(daily/2);
   const otPay=otHours*hourly*1.25,restPay=restDays*daily*1.30;
-  const grossPay=emp.salary+otPay+restPay-absentDed-lateDed-halfDed;
-  const allowances=(+emp.rice||0)+(+emp.trans||0)+(+emp.phone||0)+(+emp.other||0);
+  const grossPay=periodSalary+otPay+restPay-absentDed-lateDed-halfDed;
+  const monthlyAllowances=(+emp.rice||0)+(+emp.trans||0)+(+emp.phone||0)+(+emp.other||0);
+  const allowances=isHalf?monthlyAllowances/2:monthlyAllowances;
   const sssData=computeSSS(emp.salary),phicData=computePhilHealth(emp.salary),hdmfData=computePagibig(emp.salary);
-  const sss=sssData.ee,phic=phicData.ee,hdmf=hdmfData.ee;
-  const sssEr=sssData.er,phicEr=phicData.er,hdmfEr=hdmfData.er;
+  let sss=sssData.ee,phic=phicData.ee,hdmf=hdmfData.ee,sssEr=sssData.er,phicEr=phicData.er,hdmfEr=hdmfData.er;
+  if(isHalf){
+    // Split evenly; period 2 gets the remainder so the two halves always sum
+    // exactly to the full-month figure (avoids ₱1 drift from double-rounding).
+    const half=v=>{const a=Math.round(v/2);return period==='1'?a:v-a;};
+    sss=half(sss);phic=half(phic);hdmf=half(hdmf);sssEr=half(sssEr);phicEr=half(phicEr);hdmfEr=half(hdmfEr);
+  }
   const totalStatutory=sss+phic+hdmf;
-  const nonTaxRice=Math.min(+emp.rice||0,2000);
+  const nonTaxRice=Math.min(+emp.rice||0,2000)*(isHalf?0.5:1);
   const taxableIncome=grossPay+allowances-nonTaxRice-totalStatutory;
-  const withholdingTax=computeTax(Math.max(0,taxableIncome));
-  const approvedClaims=DB.claims.filter(c=>c.empId===emp.id&&c.status==='Approved'&&c.date&&c.date.startsWith(month)).reduce((s,c)=>s+parseFloat(c.amount),0);
+  const withholdingTax=isHalf?computeTaxSemiMonthly(Math.max(0,taxableIncome)):computeTax(Math.max(0,taxableIncome));
+  const approvedClaims=DB.claims.filter(c=>c.empId===emp.id&&c.status==='Approved'&&c.date&&c.date>=start&&c.date<=end).reduce((s,c)=>s+parseFloat(c.amount),0);
   const netPay=grossPay+allowances-totalStatutory-withholdingTax+approvedClaims;
   const totalEmployerCost=grossPay+allowances+sssEr+phicEr+hdmfEr;
   return{grossPay,allowances,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax,totalStatutory,totalEmployerCost,netPay,otPay,restPay,absentDed,lateDed,halfDed,otHours,absent,lwop,approvedClaims,daily,hourly,taxableIncome,lateHrs,halfDay,restDays};
 }
+function payPeriodsFor(emp){return emp.pay_frequency==='semi_monthly'?['1','2']:['full'];}
+function periodLabel(period){return period==='1'?' — 1st Half (1–15)':period==='2'?' — 2nd Half (16–end)':'';}
 
 // ═══════════════════════════════════════════════
 // APP SHELL & NAVIGATION
@@ -797,8 +833,8 @@ function togglePaymentFields(){
 }
 function openEmpModal(id){
   document.getElementById('empModalTitle').textContent = id?'Edit Employee':'Add Employee';
-  const fields=['id','name','pos','dept','type','hired','sal','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status'];
-  const keys  =['id','name','position','dept','emptype','hired','salary','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status'];
+  const fields=['id','name','pos','dept','type','hired','sal','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status','pay_frequency'];
+  const keys  =['id','name','position','dept','emptype','hired','salary','rice','trans','phone','other','email','sss','phic','hdmf','tin','contact','address','role','status','pay_frequency'];
   if(id){
     const e=DB.employees.find(x=>x.id===id);
     if(!e)return;
@@ -821,6 +857,7 @@ function openEmpModal(id){
     document.getElementById('f_status').value='Active';
     document.getElementById('f_type').value='Regular';
     document.getElementById('f_role').value='employee';
+    document.getElementById('f_pay_frequency').value='monthly_end';
     document.getElementById('f_company').value='I-BG Consultancy & Trading (S) Pte Ltd';
     document.getElementById('f_payment_channel').value='bank';
     document.getElementById('f_bank_name').value='';
@@ -860,6 +897,7 @@ async function saveEmployee(){
     address:document.getElementById('f_address').value.trim(),
     role:document.getElementById('f_role').value,
     status:document.getElementById('f_status').value,
+    pay_frequency:document.getElementById('f_pay_frequency').value,
     payment_channel:document.getElementById('f_payment_channel').value||'bank',
     bank_name:document.getElementById('f_bank_name').value,
     bank_account_number:(document.getElementById('f_payment_channel').value==='bank'||document.getElementById('f_payment_channel').value==='cash')?document.getElementById('f_bank_account_number').value.trim():document.getElementById('f_mobile_number').value.trim(),
@@ -1204,25 +1242,28 @@ function disburseBadge(status){
 function renderPayroll(){
   const m=currentMonth();
   const activeEmps=DB.employees.filter(e=>e.status==='Active');
+  const slots=activeEmps.flatMap(e=>payPeriodsFor(e).map(period=>({e,period})));
   const processed=DB.payroll.filter(p=>p.month===m);
   const releasable=processed.filter(p=>p.disbursementStatus==='pending'||p.disbursementStatus==='failed');
   document.getElementById('content').innerHTML=`
     <div class="section-header">
-      <div><div class="section-title">Process Payroll — ${monthLabel(m)}</div><div class="section-sub">${processed.length} of ${activeEmps.length} employees processed</div></div>
+      <div><div class="section-title">Process Payroll — ${monthLabel(m)}</div><div class="section-sub">${processed.length} of ${slots.length} pay runs processed</div></div>
       <div style="display:flex;gap:8px">
         ${canEdit()?`<button class="btn btn-primary" ${act('processAllPayroll')}>⚙️ Process All</button>
         ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" ${act('releasePayroll',releasable.map(p=>p.id))}>💸 Release Payroll (${releasable.length})</button>`:''}`:''}
       </div>
     </div>
-    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
-    ${activeEmps.map(e=>{
-      const p=processed.find(x=>x.empId===e.id);
-      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
-      const comp=computePayroll(e,m);
-      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" ${act('processSinglePayroll',e.id)}>▶</button>`:''}</td></tr>`;
-    }).join('')||'<tr><td colspan="10" class="no-data">No active employees.</td></tr>'}
+    <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Period</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
+    ${slots.length?slots.map(({e,period})=>{
+      const p=processed.find(x=>x.empId===e.id&&x.period===period);
+      const periodTag=period==='1'?'1st Half':period==='2'?'2nd Half':'Full Month';
+      const basic=period==='1'||period==='2'?e.salary/2:e.salary;
+      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${periodTag}</td><td>${fmt(basic)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
+      const comp=computePayroll(e,m,period);
+      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${periodTag}</td><td>${fmt(basic)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" ${act('processSinglePayroll',e.id,period)}>▶</button>`:''}</td></tr>`;
+    }).join(''):'<tr><td colspan="11" class="no-data">No active employees.</td></tr>'}
     </tbody>
-    ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="6" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} employees)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
+    ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="7" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} pay runs)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
     </table></div>`;
 }
 
@@ -1281,22 +1322,22 @@ async function releasePayroll(payrollIds){
   }catch(err){showLoading(false);toast(err.message,'error');}
 }
 
-async function processSinglePayroll(empId){
+async function processSinglePayroll(empId,period='full'){
   if(!canEdit())return;
   const m=currentMonth();
   const emp=DB.employees.find(e=>e.id===empId);
   if(!emp)return;
-  const existing=DB.payroll.find(p=>p.empId===empId&&p.month===m);
+  const existing=DB.payroll.find(p=>p.empId===empId&&p.month===m&&p.period===period);
   if(existing){if(!confirm('Re-process this payroll? Existing record will be updated.'))return;}
-  const comp=computePayroll(emp,m);
-  const record={id:existing?existing.id:uid(),empId,month:m,...comp,processedDate:today()};
+  const comp=computePayroll(emp,m,period);
+  const record={id:existing?existing.id:uid(),empId,month:m,period,...comp,processedDate:today()};
   showLoading(true);
   const {error}=await sb.from('payroll').upsert(denormPayroll(record));
   showLoading(false);
   if(error){toast(error.message,'error');return;}
   const idx=DB.payroll.findIndex(p=>p.id===record.id);
   if(idx>=0)DB.payroll[idx]=record; else DB.payroll.unshift(record);
-  toast('Payroll processed for '+emp.name.split(',')[0]);
+  toast('Payroll processed for '+emp.name.split(',')[0]+periodLabel(period));
   renderPayroll();
 }
 
@@ -1305,11 +1346,12 @@ async function processAllPayroll(){
   if(!confirm('Process payroll for all active employees this month?'))return;
   const m=currentMonth();
   const activeEmps=DB.employees.filter(e=>e.status==='Active');
+  const slots=activeEmps.flatMap(e=>payPeriodsFor(e).map(period=>({e,period})));
   showLoading(true);
-  for(const emp of activeEmps){
-    const existing=DB.payroll.find(p=>p.empId===emp.id&&p.month===m);
-    const comp=computePayroll(emp,m);
-    const record={id:existing?existing.id:uid(),empId:emp.id,month:m,...comp,processedDate:today()};
+  for(const{e:emp,period}of slots){
+    const existing=DB.payroll.find(p=>p.empId===emp.id&&p.month===m&&p.period===period);
+    const comp=computePayroll(emp,m,period);
+    const record={id:existing?existing.id:uid(),empId:emp.id,month:m,period,...comp,processedDate:today()};
     const {error}=await sb.from('payroll').upsert(denormPayroll(record));
     if(!error){const idx=DB.payroll.findIndex(p=>p.id===record.id);if(idx>=0)DB.payroll[idx]=record;else DB.payroll.unshift(record);}
   }
@@ -1325,7 +1367,7 @@ async function undoPayroll(payrollId){
   if(p.disbursementStatus==='released'){toast('Cannot undo a released payroll.','error');return;}
   const emp=DB.employees.find(e=>e.id===p.empId);
   const label=emp?emp.name.split(',')[0]:'this employee';
-  if(!confirm(`Delete payroll record for ${label} (${monthLabel(p.month)})?\n\nThis will reset them back to "Pending" for this month. This cannot be undone.`))return;
+  if(!confirm(`Delete payroll record for ${label} (${monthLabel(p.month)}${periodLabel(p.period)})?\n\nThis will reset them back to "Pending" for this period. This cannot be undone.`))return;
   showLoading(true);
   const {error}=await sb.from('payroll').delete().eq('id',payrollId);
   showLoading(false);
@@ -1340,7 +1382,7 @@ function editPayroll(payrollId){
   const emp=DB.employees.find(e=>e.id===p.empId);
   document.getElementById('ep_id').value=payrollId;
   document.getElementById('ep_empname').textContent=emp?emp.name:'—';
-  document.getElementById('ep_month').textContent=monthLabel(p.month);
+  document.getElementById('ep_month').textContent=monthLabel(p.month)+periodLabel(p.period);
   document.getElementById('ep_salary').value=emp?emp.salary:'';
   document.getElementById('ep_grosspay').value=p.grossPay||0;
   document.getElementById('ep_allowances').value=p.allowances||0;
@@ -1419,7 +1461,7 @@ function viewPayslip(payrollId){
     <div style="padding:32px;font-family:'Inter',sans-serif">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #f0dde4">
         <div><h2 style="font-family:'Playfair Display',serif;color:#7a1c3a;font-size:22px">I-BG Group of Companies</h2><p style="color:#9a7f87;font-size:12px">HR & Payroll Department</p></div>
-        <div style="text-align:right"><div style="font-weight:700;color:#7a1c3a;font-size:16px">PAYSLIP</div><div style="font-size:12px;color:#9a7f87">${monthLabel(p.month)}</div><div style="font-size:11px;color:#9a7f87">Processed: ${fmtDate(p.processedDate)}</div></div>
+        <div style="text-align:right"><div style="font-weight:700;color:#7a1c3a;font-size:16px">PAYSLIP</div><div style="font-size:12px;color:#9a7f87">${monthLabel(p.month)}${periodLabel(p.period)}</div><div style="font-size:11px;color:#9a7f87">Processed: ${fmtDate(p.processedDate)}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
         <div><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Employee</p><p style="font-weight:700;font-size:16px">${emp.name}</p><p style="color:#9a7f87;font-size:12px">${emp.position} · ${emp.dept}</p><p style="color:#9a7f87;font-size:12px">${emp.id} · ${emp.emptype}</p><p style="color:#9a7f87;font-size:11px;margin-top:2px">${emp.company||'I-BG Consultancy &amp; Trading (S) Pte Ltd'}</p></div>
@@ -1481,7 +1523,7 @@ function renderPayslips(){
     <div class="section-header"><div><div class="section-title">All Payslips</div></div></div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Month</th><th>Gross Pay</th><th>Deductions</th><th>Net Pay</th><th>Processed</th><th></th></tr></thead><tbody>
     ${DB.payroll.length?DB.payroll.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr>
-      <td>${e?e.name:'—'}</td><td>${monthLabel(p.month)}</td><td>${fmt(p.grossPay)}</td>
+      <td>${e?e.name:'—'}</td><td>${monthLabel(p.month)}${periodLabel(p.period)}</td><td>${fmt(p.grossPay)}</td>
       <td>${fmt(parseFloat(p.totalStatutory)+parseFloat(p.withholdingTax))}</td>
       <td><strong>${fmt(p.netPay)}</strong></td><td>${fmtDate(p.processedDate)}</td>
       <td><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️ View</button></td>
@@ -1498,8 +1540,9 @@ function renderThirteenth(){
     <div class="section-header"><div><div class="section-title">13th Month Pay — ${year}</div><div class="section-sub">Non-taxable up to ₱90,000 (TRAIN Law)</div></div></div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Months Worked</th><th>Total Basic Earned</th><th>13th Month Pay</th><th>Non-Taxable</th><th>Taxable Portion</th></tr></thead><tbody>
     ${DB.employees.filter(e=>e.status==='Active').map(e=>{
-      const monthsWorked=DB.payroll.filter(p=>p.empId===e.id&&p.month.startsWith(year)).length;
-      const totalBasic=monthsWorked*e.salary;
+      const yearPayroll=DB.payroll.filter(p=>p.empId===e.id&&p.month&&p.month.startsWith(year));
+      const monthsWorked=new Set(yearPayroll.map(p=>p.month)).size;
+      const totalBasic=yearPayroll.reduce((s,p)=>s+parseFloat(p.grossPay||0),0);
       const thirteenth=totalBasic/12;
       const nonTax=Math.min(thirteenth,90000);
       const taxable=Math.max(0,thirteenth-90000);
@@ -1529,7 +1572,7 @@ function renderReports(){
       <div class="card purple"><div class="card-accent"></div><div class="card-icon">📋</div><div class="card-val" style="font-size:20px">${fmt(totalTax)}</div><div class="card-label">Withholding Tax</div></div>
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Gross</th><th>SSS (EE)</th><th>SSS (ER)</th><th>PhilHealth (EE)</th><th>PhilHealth (ER)</th><th>Pag-IBIG (EE)</th><th>Pag-IBIG (ER)</th><th>Tax</th><th>Net Pay</th><th style="color:#28a745">Employer Cost</th></tr></thead><tbody>
-    ${monthPay.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr><td>${e?esc(e.name):'—'}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.sss)}</td><td style="color:#28a745">${fmt(p.sssEr||0)}</td><td>${fmt(p.phic)}</td><td style="color:#28a745">${fmt(p.phicEr||0)}</td><td>${fmt(p.hdmf)}</td><td style="color:#28a745">${fmt(p.hdmfEr||0)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td style="color:#28a745"><strong>${fmt(p.totalEmployerCost||0)}</strong></td></tr>`;}).join('')||'<tr><td colspan="11" class="no-data">No payroll processed for this month.</td></tr>'}
+    ${monthPay.map(p=>{const e=DB.employees.find(x=>x.id===p.empId);return`<tr><td>${e?esc(e.name):'—'}${periodLabel(p.period)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.sss)}</td><td style="color:#28a745">${fmt(p.sssEr||0)}</td><td>${fmt(p.phic)}</td><td style="color:#28a745">${fmt(p.phicEr||0)}</td><td>${fmt(p.hdmf)}</td><td style="color:#28a745">${fmt(p.hdmfEr||0)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td style="color:#28a745"><strong>${fmt(p.totalEmployerCost||0)}</strong></td></tr>`;}).join('')||'<tr><td colspan="11" class="no-data">No payroll processed for this month.</td></tr>'}
     ${monthPay.length?`<tr style="background:var(--blush)"><td><strong>TOTAL</strong></td><td><strong>${fmt(totalGross)}</strong></td><td><strong>${fmt(totalSSS)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.sssEr||0),0))}</strong></td><td><strong>${fmt(totalPhic)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.phicEr||0),0))}</strong></td><td><strong>${fmt(totalHdmf)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.hdmfEr||0),0))}</strong></td><td><strong>${fmt(totalTax)}</strong></td><td><strong>${fmt(totalNet)}</strong></td><td style="color:#28a745"><strong>${fmt(monthPay.reduce((s,p)=>s+parseFloat(p.totalEmployerCost||0),0))}</strong></td></tr>`:''}
     </tbody></table></div>`;
 }
@@ -1720,7 +1763,7 @@ function renderMyPayslips(){
     <div class="section-header"><div><div class="section-title">My Payslips</div><div class="section-sub">${myPayslips.length} payslips</div></div></div>
     <div class="table-wrap"><table><thead><tr><th>Period</th><th>Gross Pay</th><th>Deductions</th><th>Net Pay</th><th>Processed</th><th>Payment Status</th><th></th></tr></thead><tbody>
     ${myPayslips.length?myPayslips.map(p=>`<tr>
-      <td><strong>${monthLabel(p.month)}</strong></td>
+      <td><strong>${monthLabel(p.month)}${periodLabel(p.period)}</strong></td>
       <td>${fmt(p.grossPay)}</td>
       <td>${fmt(parseFloat(p.totalStatutory||0)+parseFloat(p.withholdingTax||0))}</td>
       <td><strong style="color:var(--green)">${fmt(p.netPay)}</strong></td>
@@ -1791,7 +1834,7 @@ function renderMy13th(){
       <div style="display:grid;gap:12px">
         ${yearPayroll.sort((a,b)=>a.month.localeCompare(b.month)).map(p=>`
           <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fdf6f8;border-radius:8px">
-            <span style="font-weight:600">${monthLabel(p.month)}</span>
+            <span style="font-weight:600">${monthLabel(p.month)}${periodLabel(p.period)}</span>
             <span style="color:var(--maroon);font-weight:700">${fmt(p.grossPay)}</span>
           </div>`).join('')||'<div style="text-align:center;color:#9a7f87;padding:20px">No payroll processed for '+year+' yet.</div>'}
       </div>
