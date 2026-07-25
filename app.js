@@ -809,7 +809,7 @@ function renderUserRoles(){
         <option value="viewer"${e.role==='viewer'?' selected':''}>Viewer</option>
       </select>`:`<span class="badge ${roleBadge[e.role]||'badge-gray'}">${roleLabel[e.role]||'Employee'}</span>`}</td>
       <td>${e.user_id?'<span class="badge badge-green">Linked</span>':'<span class="badge badge-amber">Not yet logged in</span>'}</td>
-      ${canEdit()?`<td><button class="btn btn-ghost btn-sm" ${act('inviteEmployee',e.id)} title="Set password or send invite">✉️ Provision Login</button></td>`:''}
+      ${canEdit()?`<td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('inviteEmployee',e.id)} title="Set password or send invite">✉️ Provision Login</button> <button class="btn btn-danger btn-sm" ${act('deleteEmployee',e.id)} title="Delete this account">🗑️</button></td>`:''}
     </tr>`).join(''):'<tr><td colspan="5" class="no-data">No accounts yet.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -919,6 +919,7 @@ async function saveEmployee(){
 
 async function deleteEmployee(id){
   if(!canEdit())return;
+  if(currentEmployee&&currentEmployee.id===id){toast("You can't delete your own account. Have another admin do it, or set your status to Inactive instead.",'error');return;}
   if(!confirm('Delete this employee? All their records will be removed.'))return;
   showLoading(true);
   const {error}=await sb.from('employees').delete().eq('id',id);
@@ -1526,7 +1527,7 @@ function renderPayslips(){
       <td>${e?e.name:'—'}</td><td>${monthLabel(p.month)}${periodLabel(p.period)}</td><td>${fmt(p.grossPay)}</td>
       <td>${fmt(parseFloat(p.totalStatutory)+parseFloat(p.withholdingTax))}</td>
       <td><strong>${fmt(p.netPay)}</strong></td><td>${fmtDate(p.processedDate)}</td>
-      <td><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️ View</button></td>
+      <td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️ View</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📄</div>No payslips yet. Process payroll first.</td></tr>'}
     </tbody></table></div>`;
 }
