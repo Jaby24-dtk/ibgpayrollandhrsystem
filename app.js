@@ -128,6 +128,24 @@ function canEdit(){return currentRole==='admin';}
 function canViewAll(){return currentRole==='admin'||currentRole==='viewer';}
 
 // ═══════════════════════════════════════════════
+// CSP-SAFE ACTION DISPATCH
+// Dynamically-rendered HTML can't use inline onclick="" — this app's CSP
+// (script-src with no 'unsafe-inline') silently blocks it. Buttons built by
+// render*() functions instead carry data-act/data-args, handled by one
+// delegated listener below.
+// ═══════════════════════════════════════════════
+function act(fn,...args){return `data-act="${fn}" data-args='${JSON.stringify(args).replace(/'/g,'&#39;')}'`;}
+document.addEventListener('click', function(e){
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const fn = el.getAttribute('data-act');
+  let args = [];
+  const raw = el.getAttribute('data-args');
+  if(raw) args = JSON.parse(raw.replace(/&#39;/g,"'"));
+  if(typeof window[fn]==='function') window[fn](...args);
+});
+
+// ═══════════════════════════════════════════════
 // AUTH — WEBAUTHN + EMAIL OTP FALLBACK
 // ═══════════════════════════════════════════════
 let pendingPasswordSession = null; // session from signInWithPassword
@@ -575,6 +593,44 @@ function computePayroll(emp,month){
 // ═══════════════════════════════════════════════
 const pageTitles={dashboard:'Dashboard',employees:'Employee Directory',attendance:'Attendance — DTR',leaves:'Leave Management',claims:'Claims & Expenses',payroll:'Process Payroll',payslips:'Payslips',thirteenth:'13th Month Pay',reports:'Payroll Reports','my-leaves':'My Leave Requests','my-claims':'My Expense Claims','my-payslips':'My Payslips'};
 
+const NAV_ICONS = {
+  dashboard:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  employees:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  attendance:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>',
+  leaves:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  claims:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>',
+  payroll:'<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/>',
+  payslips:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>',
+  thirteenth:'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+  reports:'<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+  'my-profile':'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  'my-attendance':'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>',
+  'my-leaves':'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  'my-claims':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>',
+  'my-payslips':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  'my-13th':'<polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>',
+};
+function navItemHtml(page,label){
+  return `<div class="sb-item" ${act('nav',page)}><span class="icon"><svg viewBox="0 0 24 24">${NAV_ICONS[page]}</svg></span>${label}</div>`;
+}
+let collapsedSections = new Set();
+function navSectionHtml(id,title,itemsHtml){
+  const collapsed = collapsedSections.has(id);
+  return `<div class="sb-section" ${act('toggleSection',id)}><span class="sb-chevron${collapsed?'':' open'}">›</span>${title}</div>
+    <div class="sb-group${collapsed?' collapsed':''}">${itemsHtml}</div>`;
+}
+function toggleSection(id){
+  if(collapsedSections.has(id))collapsedSections.delete(id);else collapsedSections.add(id);
+  renderAppShell();
+  highlightActiveNav();
+}
+function highlightActiveNav(){
+  document.querySelectorAll('.sb-item').forEach(el=>{
+    const isMatch = el.getAttribute('data-act')==='nav' && JSON.parse(el.getAttribute('data-args')||'[]')[0]===currentPage;
+    el.classList.toggle('active', isMatch);
+  });
+}
+
 function renderAppShell(){
   // Topbar user info
   const name = currentEmployee?.name || currentUser?.email || 'User';
@@ -583,48 +639,27 @@ function renderAppShell(){
   document.getElementById('userRole').textContent = currentRole==='admin'?'Admin':currentRole==='viewer'?'Viewer':'Employee';
   document.getElementById('globalMonth').value = new Date().toISOString().slice(0,7);
 
-  // Sidebar nav
+  // Sidebar nav — grouped into collapsible categories
   const navEl = document.getElementById('sidebarNav');
   if(canViewAll()){
-    navEl.innerHTML=`
-      <div class="sb-section">Main</div>
-      <div class="sb-item" onclick="nav('dashboard')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</div>
-      <div class="sb-item" onclick="nav('employees')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Employees</div>
-      <div class="sb-section">Workforce</div>
-      <div class="sb-item" onclick="nav('attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>Attendance DTR</div>
-      <div class="sb-item" onclick="nav('leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Leave Management</div>
-      <div class="sb-item" onclick="nav('claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>Claims & Expenses</div>
-      <div class="sb-section">Payroll</div>
-      <div class="sb-item" onclick="nav('payroll')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></span>Process Payroll</div>
-      <div class="sb-item" onclick="nav('payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>Payslips</div>
-      <div class="sb-item" onclick="nav('thirteenth')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>13th Month Pay</div>
-      <div class="sb-item" onclick="nav('reports')"><span class="icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Reports</div>
-      <div class="sb-section" style="margin-top:8px;border-top:1px solid rgba(255,255,255,0.1);padding-top:8px">My Portal</div>
-      <div class="sb-item" onclick="nav('my-profile')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>My Details</div>
-      <div class="sb-item" onclick="nav('my-attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>My Attendance</div>
-      <div class="sb-item" onclick="nav('my-leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>My Leaves</div>
-      <div class="sb-item" onclick="nav('my-claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>My Claims</div>
-      <div class="sb-item" onclick="nav('my-payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>My Payslips</div>
-      <div class="sb-item" onclick="nav('my-13th')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>My 13th Month</div>`;
+    navEl.innerHTML=
+      navSectionHtml('main','Main', navItemHtml('dashboard','Dashboard')+navItemHtml('employees','Employees'))+
+      navSectionHtml('workforce','Workforce', navItemHtml('attendance','Attendance DTR')+navItemHtml('leaves','Leave Management')+navItemHtml('claims','Claims & Expenses'))+
+      navSectionHtml('payroll','Payroll', navItemHtml('payroll','Process Payroll')+navItemHtml('payslips','Payslips')+navItemHtml('thirteenth','13th Month Pay')+navItemHtml('reports','Reports'))+
+      navSectionHtml('portal','My Portal', navItemHtml('my-profile','My Details')+navItemHtml('my-attendance','My Attendance')+navItemHtml('my-leaves','My Leaves')+navItemHtml('my-claims','My Claims')+navItemHtml('my-payslips','My Payslips')+navItemHtml('my-13th','My 13th Month'));
   } else {
-    navEl.innerHTML=`
-      <div class="sb-section">My Account</div>
-      <div class="sb-item" onclick="nav('dashboard')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</div>
-      <div class="sb-item" onclick="nav('my-profile')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>My Details</div>
-      <div class="sb-section">Workforce</div>
-      <div class="sb-item" onclick="nav('my-attendance')"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg></span>My Attendance</div>
-      <div class="sb-item" onclick="nav('my-leaves')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>My Leaves</div>
-      <div class="sb-item" onclick="nav('my-claims')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></span>My Claims & Expenses</div>
-      <div class="sb-section">Payroll</div>
-      <div class="sb-item" onclick="nav('my-payslips')"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>My Payslips</div>
-      <div class="sb-item" onclick="nav('my-13th')"><span class="icon"><svg viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>My 13th Month</div>`;
+    navEl.innerHTML=
+      navSectionHtml('account','My Account', navItemHtml('dashboard','Dashboard')+navItemHtml('my-profile','My Details'))+
+      navSectionHtml('workforce','Workforce', navItemHtml('my-attendance','My Attendance')+navItemHtml('my-leaves','My Leaves')+navItemHtml('my-claims','My Claims & Expenses'))+
+      navSectionHtml('payroll','Payroll', navItemHtml('my-payslips','My Payslips')+navItemHtml('my-13th','My 13th Month'));
   }
+  highlightActiveNav();
 }
 
 let currentPage = 'dashboard';
 function nav(page){
   currentPage=page;
-  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick')===`nav('${page}')`));
+  highlightActiveNav();
   document.getElementById('pageTitle').textContent=pageTitles[page]||page;
   const renders={
     dashboard:renderDashboard,employees:renderEmployees,attendance:renderAttendance,
@@ -694,7 +729,7 @@ function renderEmployees(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Employee Directory</div><div class="section-sub">${DB.employees.length} employees on record</div></div>
-      ${canEdit()?`<button class="btn btn-primary" onclick="openEmpModal()">+ Add Employee</button>`:''}
+      ${canEdit()?`<button class="btn btn-primary" ${act('openEmpModal')}>+ Add Employee</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Company</th><th>Position</th><th>Department</th><th>Type</th><th>Basic Salary</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.employees.length?DB.employees.map(e=>`<tr>
@@ -706,7 +741,7 @@ function renderEmployees(){
       <td><span class="badge badge-${e.emptype==='Regular'?'green':e.emptype==='Probationary'?'amber':'gray'}">${e.emptype||'—'}</span></td>
       <td>${fmt(e.salary)}</td>
       <td>${statusBadge(e.status||'Active')}</td>
-      <td>${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="editEmployee('${e.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${e.id}')">🗑️</button> <button class="btn btn-ghost btn-sm" onclick="inviteEmployee('${e.id}')" title="Send login invite email">✉️</button>`:''}</td>
+      <td>${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editEmployee',e.id)}>✏️</button> <button class="btn btn-danger btn-sm" ${act('deleteEmployee',e.id)}>🗑️</button> <button class="btn btn-ghost btn-sm" ${act('inviteEmployee',e.id)} title="Send login invite email">✉️</button>`:''}</td>
     </tr>`).join(''):'<tr><td colspan="9" class="no-data"><div class="no-data-icon">👥</div>No employees yet. Add your first employee.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -851,13 +886,13 @@ function renderAttendance(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Attendance — ${monthLabel(m)}</div><div class="section-sub">${atts.length} records</div></div>
-      ${canEdit()?`<button class="btn btn-primary" onclick="openAttModal()">+ Log Attendance</button>`:''}
+      ${canEdit()?`<button class="btn btn-primary" ${act('openAttModal')}>+ Log Attendance</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hrs</th><th>Remarks</th><th></th></tr></thead><tbody>
     ${atts.length?atts.map(a=>{const e=DB.employees.find(x=>x.id===a.empId);return`<tr>
       <td>${e?e.name:'—'}</td><td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
       <td>${statusBadge(a.status)}</td><td>${a.ot||0}</td><td>${a.remarks||'—'}</td>
-      <td>${canEdit()?`<button class="btn btn-danger btn-sm" onclick="deleteAttendance('${a.id}')">🗑️</button>`:''}</td>
+      <td>${canEdit()?`<button class="btn btn-danger btn-sm" ${act('deleteAttendance',a.id)}>🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -903,15 +938,15 @@ function renderLeaves(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Leave Management</div><div class="section-sub">${pending.length} pending approval</div></div>
-      ${canEdit()?`<button class="btn btn-primary" onclick="openLeaveModal()">+ File Leave</button>`:''}
+      ${canEdit()?`<button class="btn btn-primary" ${act('openLeaveModal')}>+ File Leave</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Pay</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead><tbody>
     ${DB.leaves.length?DB.leaves.map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr>
       <td>${e?e.name.split(',')[0]:'—'}</td><td>${l.type}</td><td>${fmtDate(l.from)}</td><td>${fmtDate(l.to)}</td>
       <td>${l.pay==='1'?'<span class="badge badge-green">With Pay</span>':'<span class="badge badge-red">LWOP</span>'}</td>
       <td>${statusBadge(l.status)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${l.reason||'—'}</td>
-      <td style="white-space:nowrap">${canEdit()?`${l.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateLeave('${l.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateLeave('${l.id}','Rejected')">✗</button> `:''}
-        <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" onclick="deleteLeave('${l.id}')">🗑️</button>`:''}</td>
+      <td style="white-space:nowrap">${canEdit()?`${l.status==='Pending'?`<button class="btn btn-success btn-sm" ${act('updateLeave',l.id,'Approved')}>✓</button> <button class="btn btn-danger btn-sm" ${act('updateLeave',l.id,'Rejected')}>✗</button> `:''}
+        <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" ${act('deleteLeave',l.id)}>🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">🌿</div>No leave requests.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -982,14 +1017,14 @@ function renderClaims(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Claims & Expenses</div><div class="section-sub">${pending.length} pending approval</div></div>
-      ${canEdit()?`<button class="btn btn-primary" onclick="openClaimModal()">+ File Claim</button>`:''}
+      ${canEdit()?`<button class="btn btn-primary" ${act('openClaimModal')}>+ File Claim</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.claims.length?DB.claims.map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr>
       <td>${e?e.name.split(',')[0]:'—'}</td><td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td><td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
       <td>${statusBadge(c.status)}</td>
-      <td>${canEdit()&&c.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateClaim('${c.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateClaim('${c.id}','Rejected')">✗</button>`:'—'}</td>
+      <td>${canEdit()&&c.status==='Pending'?`<button class="btn btn-success btn-sm" ${act('updateClaim',c.id,'Approved')}>✓</button> <button class="btn btn-danger btn-sm" ${act('updateClaim',c.id,'Rejected')}>✗</button>`:'—'}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">💼</div>No expense claims.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -1070,16 +1105,16 @@ function renderPayroll(){
     <div class="section-header">
       <div><div class="section-title">Process Payroll — ${monthLabel(m)}</div><div class="section-sub">${processed.length} of ${activeEmps.length} employees processed</div></div>
       <div style="display:flex;gap:8px">
-        ${canEdit()?`<button class="btn btn-primary" onclick="processAllPayroll()">⚙️ Process All</button>
-        ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" onclick="releasePayroll(${JSON.stringify(releasable.map(p=>p.id))})">💸 Release Payroll (${releasable.length})</button>`:''}`:''}
+        ${canEdit()?`<button class="btn btn-primary" ${act('processAllPayroll')}>⚙️ Process All</button>
+        ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" ${act('releasePayroll',releasable.map(p=>p.id))}>💸 Release Payroll (${releasable.length})</button>`:''}`:''}
       </div>
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
     ${activeEmps.map(e=>{
       const p=processed.find(x=>x.empId===e.id);
-      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
+      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
       const comp=computePayroll(e,m);
-      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button>`:''}</td></tr>`;
+      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" ${act('processSinglePayroll',e.id)}>▶</button>`:''}</td></tr>`;
     }).join('')||'<tr><td colspan="10" class="no-data">No active employees.</td></tr>'}
     </tbody>
     ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="6" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} employees)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
@@ -1344,7 +1379,7 @@ function renderPayslips(){
       <td>${e?e.name:'—'}</td><td>${monthLabel(p.month)}</td><td>${fmt(p.grossPay)}</td>
       <td>${fmt(parseFloat(p.totalStatutory)+parseFloat(p.withholdingTax))}</td>
       <td><strong>${fmt(p.netPay)}</strong></td><td>${fmtDate(p.processedDate)}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️ View</button></td>
+      <td><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️ View</button></td>
     </tr>`}).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📄</div>No payslips yet. Process payroll first.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -1467,7 +1502,7 @@ function renderMyLeaves(){
           ${rejected.length?`<span style="background:#f8d7da;color:#721c24;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">❌ ${rejected.length} Rejected</span>`:''}
         </div>
       </div>
-      ${currentRole!=='viewer'?`<button class="btn btn-primary" onclick="openMyLeaveModal()">+ File Leave</button>`:''}
+      ${currentRole!=='viewer'?`<button class="btn btn-primary" ${act('openMyLeaveModal')}>+ File Leave</button>`:''}
     </div>
 
     <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:20px 22px;margin-bottom:16px">
@@ -1550,7 +1585,7 @@ function renderMyClaims(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">My Expense Claims</div><div class="section-sub">${myClaims.length} total · ${myClaims.filter(c=>c.status==='Pending').length} pending</div></div>
-      ${currentRole!=='viewer'?`<button class="btn btn-primary" onclick="openMyClaimModal()">+ File Claim</button>`:''}
+      ${currentRole!=='viewer'?`<button class="btn btn-primary" ${act('openMyClaimModal')}>+ File Claim</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Filed</th></tr></thead><tbody>
     ${myClaims.length?myClaims.map(c=>`<tr>
@@ -1586,7 +1621,7 @@ function renderMyPayslips(){
       <td><strong style="color:var(--green)">${fmt(p.netPay)}</strong></td>
       <td>${fmtDate(p.processedDate)}</td>
       <td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87">${fmtDate(p.disbursementDate)}</div>`:''}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️ View</button></td>
+      <td><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️ View</button></td>
     </tr>`).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📄</div>No payslips available yet.</td></tr>'}
     </tbody></table></div>`;
 }

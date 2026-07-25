@@ -66,7 +66,12 @@ body{font-family:'Inter',sans-serif;background:#fdf3f6;color:#2d1a25;font-size:1
 .sb-logo-text h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;letter-spacing:.3px;line-height:1.2}
 .sb-logo-text p{font-size:10px;opacity:.65;margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
 .sb-nav{padding:14px 0;flex:1}
-.sb-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;opacity:.45;padding:10px 20px 5px}
+.sb-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;opacity:.45;padding:10px 20px 5px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;transition:opacity .2s}
+.sb-section:hover{opacity:.75}
+.sb-chevron{display:inline-block;font-size:11px;transition:transform .2s;transform:rotate(0deg)}
+.sb-chevron.open{transform:rotate(90deg)}
+.sb-group{overflow:hidden;max-height:600px;transition:max-height .2s ease}
+.sb-group.collapsed{max-height:0}
 .sb-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;transition:.2s;font-size:13px;opacity:.8;font-weight:500;position:relative}
 .sb-item:hover{background:rgba(255,255,255,.1);opacity:1}
 .sb-item.active{background:rgba(255,255,255,.15);opacity:1}
