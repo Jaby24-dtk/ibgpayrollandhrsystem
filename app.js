@@ -957,17 +957,29 @@ async function submitInviteModal(){
   }
   showLoading(true);
   try{
-    const res=await fetch('https://gxtyhkwpctupbcydfuud.supabase.co/functions/v1/invite-user',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
-      body:JSON.stringify(body)
-    });
-    const data=await res.json();
+    const {res,data}=await callInviteUserFn(body);
     showLoading(false);
     if(!res.ok){err.textContent=data.error||'Could not provision login';err.style.display='block';return;}
     closeModal('inviteModal');
     toast(method==='password'?'Password set for '+emp.email:'Invite sent to '+emp.email);
   }catch(e){showLoading(false);err.textContent=e.message||'Could not provision login';err.style.display='block';}
+}
+async function callInviteUserFn(body,retriesLeft=2){
+  const res=await fetch('https://gxtyhkwpctupbcydfuud.supabase.co/functions/v1/invite-user',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
+    body:JSON.stringify(body)
+  });
+  const data=await res.json().catch(()=>({}));
+  // The platform's edge-function JWT gateway occasionally has a stale key
+  // cache right after deploys and errors with "invalid JWT ... unrecognized
+  // kid" even for a genuinely valid session — this clears within a second,
+  // so retry transparently rather than surfacing it as a real auth failure.
+  if(!res.ok && retriesLeft>0 && /invalid jwt|unrecognized jwt|unable to (parse|verify)/i.test(data.error||'')){
+    await new Promise(r=>setTimeout(r,900));
+    return callInviteUserFn(body,retriesLeft-1);
+  }
+  return {res,data};
 }
 
 // ═══════════════════════════════════════════════
