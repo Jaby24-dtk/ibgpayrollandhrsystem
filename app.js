@@ -124,6 +124,8 @@ let currentEmployee = null;
 let currentRole = 'employee';
 let DB = { employees:[], attendance:[], leaves:[], claims:[], payroll:[] };
 let activeTab = 'in';
+function canEdit(){return currentRole==='admin';}
+function canViewAll(){return currentRole==='admin'||currentRole==='viewer';}
 
 // ═══════════════════════════════════════════════
 // AUTH — WEBAUTHN + EMAIL OTP FALLBACK
@@ -461,7 +463,7 @@ function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,gross_pay:
 // ═══════════════════════════════════════════════
 async function loadData(){
   try{
-    if(currentRole==='admin'){
+    if(canViewAll()){
       const [e,a,l,c,p] = await Promise.all([
         sb.from('employees').select('*').order('name'),
         sb.from('attendance').select('*').order('date',{ascending:false}),
@@ -578,12 +580,12 @@ function renderAppShell(){
   const name = currentEmployee?.name || currentUser?.email || 'User';
   document.getElementById('userName').textContent = name.split(',')[0].trim();
   document.getElementById('userAvatar').textContent = initials(name);
-  document.getElementById('userRole').textContent = currentRole==='admin'?'Admin':'Employee';
+  document.getElementById('userRole').textContent = currentRole==='admin'?'Admin':currentRole==='viewer'?'Viewer':'Employee';
   document.getElementById('globalMonth').value = new Date().toISOString().slice(0,7);
 
   // Sidebar nav
   const navEl = document.getElementById('sidebarNav');
-  if(currentRole==='admin'){
+  if(canViewAll()){
     navEl.innerHTML=`
       <div class="sb-section">Main</div>
       <div class="sb-item" onclick="nav('dashboard')"><span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Dashboard</div>
@@ -692,7 +694,7 @@ function renderEmployees(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Employee Directory</div><div class="section-sub">${DB.employees.length} employees on record</div></div>
-      <button class="btn btn-primary" onclick="openEmpModal()">+ Add Employee</button>
+      ${canEdit()?`<button class="btn btn-primary" onclick="openEmpModal()">+ Add Employee</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Company</th><th>Position</th><th>Department</th><th>Type</th><th>Basic Salary</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.employees.length?DB.employees.map(e=>`<tr>
@@ -704,7 +706,7 @@ function renderEmployees(){
       <td><span class="badge badge-${e.emptype==='Regular'?'green':e.emptype==='Probationary'?'amber':'gray'}">${e.emptype||'—'}</span></td>
       <td>${fmt(e.salary)}</td>
       <td>${statusBadge(e.status||'Active')}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="editEmployee('${e.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${e.id}')">🗑️</button></td>
+      <td>${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="editEmployee('${e.id}')">✏️</button> <button class="btn btn-danger btn-sm" onclick="deleteEmployee('${e.id}')">🗑️</button> <button class="btn btn-ghost btn-sm" onclick="inviteEmployee('${e.id}')" title="Send login invite email">✉️</button>`:''}</td>
     </tr>`).join(''):'<tr><td colspan="9" class="no-data"><div class="no-data-icon">👥</div>No employees yet. Add your first employee.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -767,6 +769,7 @@ function openEmpModal(id){
 function editEmployee(id){openEmpModal(id);}
 
 async function saveEmployee(){
+  if(!canEdit())return;
   const editId=document.getElementById('empModal').dataset.editId;
   const emp={
     id:editId||document.getElementById('f_id').value.trim(),
@@ -809,6 +812,7 @@ async function saveEmployee(){
 }
 
 async function deleteEmployee(id){
+  if(!canEdit())return;
   if(!confirm('Delete this employee? All their records will be removed.'))return;
   showLoading(true);
   const {error}=await sb.from('employees').delete().eq('id',id);
@@ -817,6 +821,25 @@ async function deleteEmployee(id){
   DB.employees=DB.employees.filter(e=>e.id!==id);
   toast('Employee deleted.');
   renderEmployees();
+}
+
+async function inviteEmployee(id){
+  if(!canEdit())return;
+  const emp=DB.employees.find(e=>e.id===id);
+  if(!emp||!emp.email){toast('This employee has no email on file.','error');return;}
+  if(!confirm(`Send a login-setup email to ${emp.email}?`))return;
+  showLoading(true);
+  try{
+    const res=await fetch('https://gxtyhkwpctupbcydfuud.supabase.co/functions/v1/invite-user',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
+      body:JSON.stringify({email:emp.email})
+    });
+    const data=await res.json();
+    showLoading(false);
+    if(!res.ok){toast(data.error||'Could not send invite','error');return;}
+    toast('Invite sent to '+emp.email);
+  }catch(err){showLoading(false);toast(err.message||'Could not send invite','error');}
 }
 
 // ═══════════════════════════════════════════════
@@ -828,13 +851,13 @@ function renderAttendance(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Attendance — ${monthLabel(m)}</div><div class="section-sub">${atts.length} records</div></div>
-      <button class="btn btn-primary" onclick="openAttModal()">+ Log Attendance</button>
+      ${canEdit()?`<button class="btn btn-primary" onclick="openAttModal()">+ Log Attendance</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hrs</th><th>Remarks</th><th></th></tr></thead><tbody>
     ${atts.length?atts.map(a=>{const e=DB.employees.find(x=>x.id===a.empId);return`<tr>
       <td>${e?e.name:'—'}</td><td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
       <td>${statusBadge(a.status)}</td><td>${a.ot||0}</td><td>${a.remarks||'—'}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteAttendance('${a.id}')">🗑️</button></td>
+      <td>${canEdit()?`<button class="btn btn-danger btn-sm" onclick="deleteAttendance('${a.id}')">🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -847,6 +870,7 @@ function openAttModal(){
 }
 
 async function saveAttendance(){
+  if(!canEdit())return;
   const att={id:uid(),empId:document.getElementById('a_emp').value,date:document.getElementById('a_date').value,timeIn:document.getElementById('a_in').value,timeOut:document.getElementById('a_out').value,status:document.getElementById('a_status').value,ot:parseFloat(document.getElementById('a_ot').value)||0,remarks:document.getElementById('a_remarks').value};
   if(!att.empId||!att.date){toast('Select employee and date.','error');return;}
   showLoading(true);
@@ -860,6 +884,7 @@ async function saveAttendance(){
 }
 
 async function deleteAttendance(id){
+  if(!canEdit())return;
   if(!confirm('Delete this record?'))return;
   showLoading(true);
   const {error}=await sb.from('attendance').delete().eq('id',id);
@@ -878,15 +903,15 @@ function renderLeaves(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Leave Management</div><div class="section-sub">${pending.length} pending approval</div></div>
-      <button class="btn btn-primary" onclick="openLeaveModal()">+ File Leave</button>
+      ${canEdit()?`<button class="btn btn-primary" onclick="openLeaveModal()">+ File Leave</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Pay</th><th>Status</th><th>Reason</th><th>Actions</th></tr></thead><tbody>
     ${DB.leaves.length?DB.leaves.map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr>
       <td>${e?e.name.split(',')[0]:'—'}</td><td>${l.type}</td><td>${fmtDate(l.from)}</td><td>${fmtDate(l.to)}</td>
       <td>${l.pay==='1'?'<span class="badge badge-green">With Pay</span>':'<span class="badge badge-red">LWOP</span>'}</td>
       <td>${statusBadge(l.status)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${l.reason||'—'}</td>
-      <td style="white-space:nowrap">${l.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateLeave('${l.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateLeave('${l.id}','Rejected')">✗</button> `:''}
-        <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" onclick="deleteLeave('${l.id}')">🗑️</button></td>
+      <td style="white-space:nowrap">${canEdit()?`${l.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateLeave('${l.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateLeave('${l.id}','Rejected')">✗</button> `:''}
+        <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" onclick="deleteLeave('${l.id}')">🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">🌿</div>No leave requests.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -912,6 +937,7 @@ function onLeaveTypeChange(){
   }
 }
 async function saveLeave(){
+  if(currentRole==='viewer')return;
   const empId=document.getElementById('l_emp').value;
   const leave={id:uid(),empId,type:document.getElementById('l_type').value,from:document.getElementById('l_from').value,to:document.getElementById('l_to').value,reason:document.getElementById('l_reason').value,pay:document.getElementById('l_pay').value,status:'Pending',filed:today()};
   if(!empId||!leave.from||!leave.to){toast('Please fill all required fields.','error');return;}
@@ -926,6 +952,7 @@ async function saveLeave(){
 }
 
 async function updateLeave(id,status){
+  if(!canEdit())return;
   showLoading(true);
   const {error}=await sb.from('leaves').update({status}).eq('id',id);
   showLoading(false);
@@ -936,6 +963,7 @@ async function updateLeave(id,status){
   renderLeaves();
 }
 async function deleteLeave(id){
+  if(!canEdit())return;
   if(!confirm('Delete this leave record? This cannot be undone.'))return;
   showLoading(true);
   const {error}=await sb.from('leaves').delete().eq('id',id);
@@ -954,14 +982,14 @@ function renderClaims(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">Claims & Expenses</div><div class="section-sub">${pending.length} pending approval</div></div>
-      <button class="btn btn-primary" onclick="openClaimModal()">+ File Claim</button>
+      ${canEdit()?`<button class="btn btn-primary" onclick="openClaimModal()">+ File Claim</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.claims.length?DB.claims.map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr>
       <td>${e?e.name.split(',')[0]:'—'}</td><td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
       <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td><td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
       <td>${statusBadge(c.status)}</td>
-      <td>${c.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateClaim('${c.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateClaim('${c.id}','Rejected')">✗</button>`:'—'}</td>
+      <td>${canEdit()&&c.status==='Pending'?`<button class="btn btn-success btn-sm" onclick="updateClaim('${c.id}','Approved')">✓</button> <button class="btn btn-danger btn-sm" onclick="updateClaim('${c.id}','Rejected')">✗</button>`:'—'}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">💼</div>No expense claims.</td></tr>'}
     </tbody></table></div>`;
 }
@@ -978,6 +1006,7 @@ function openClaimModal(preEmpId){
 }
 
 async function saveClaim(){
+  if(currentRole==='viewer')return;
   const empId=document.getElementById('c_emp').value;
   const fileInput=document.getElementById('c_receipt_file');
   const file=fileInput.files[0];
@@ -1012,6 +1041,7 @@ async function saveClaim(){
 }
 
 async function updateClaim(id,status){
+  if(!canEdit())return;
   showLoading(true);
   const {error}=await sb.from('claims').update({status}).eq('id',id);
   showLoading(false);
@@ -1040,16 +1070,16 @@ function renderPayroll(){
     <div class="section-header">
       <div><div class="section-title">Process Payroll — ${monthLabel(m)}</div><div class="section-sub">${processed.length} of ${activeEmps.length} employees processed</div></div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-primary" onclick="processAllPayroll()">⚙️ Process All</button>
-        ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" onclick="releasePayroll(${JSON.stringify(releasable.map(p=>p.id))})">💸 Release Payroll (${releasable.length})</button>`:''}
+        ${canEdit()?`<button class="btn btn-primary" onclick="processAllPayroll()">⚙️ Process All</button>
+        ${releasable.length>0?`<button class="btn" style="background:#7a1c3a;color:#fff" onclick="releasePayroll(${JSON.stringify(releasable.map(p=>p.id))})">💸 Release Payroll (${releasable.length})</button>`:''}`:''}
       </div>
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Basic</th><th>Gross Pay</th><th>Allowances</th><th>Deductions</th><th>Tax</th><th>Net Pay</th><th>Status</th><th>Disbursement</th><th></th></tr></thead><tbody>
     ${activeEmps.map(e=>{
       const p=processed.find(x=>x.empId===e.id);
-      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> <button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}</td></tr>`;
+      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" onclick="viewPayslip('${p.id}')">👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" onclick="editPayroll('${p.id}')" title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" onclick="undoPayroll('${p.id}')" title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
       const comp=computePayroll(e,m);
-      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td><button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button></td></tr>`;
+      return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${fmt(e.salary)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" onclick="processSinglePayroll('${e.id}')">▶</button>`:''}</td></tr>`;
     }).join('')||'<tr><td colspan="10" class="no-data">No active employees.</td></tr>'}
     </tbody>
     ${processed.length>0?`<tfoot><tr style="background:#f9e8ef;font-weight:700"><td colspan="6" style="text-align:right;padding:10px 12px;color:#7a1c3a">Total Net Pay (${processed.length} employees)</td><td style="padding:10px 12px;color:#7a1c3a">${fmt(processed.reduce((s,p)=>s+parseFloat(p.netPay||0),0))}</td><td colspan="3" style="padding:10px 12px;font-size:12px;color:#9a7f87">Bank Transfer employees require Wise SGD balance. GCash/Maya/GoTyme/Cash will be marked released immediately.</td></tr></tfoot>`:''}
@@ -1061,6 +1091,7 @@ function channelLabel(ch){
   return m[ch]||'🏦 Bank (Wise)';
 }
 async function releasePayroll(payrollIds){
+  if(!canEdit())return;
   if(!payrollIds||payrollIds.length===0){toast('No payroll records to release','error');return;}
   // Split by payment channel
   const bankIds=[],manualIds=[];
@@ -1111,6 +1142,7 @@ async function releasePayroll(payrollIds){
 }
 
 async function processSinglePayroll(empId){
+  if(!canEdit())return;
   const m=currentMonth();
   const emp=DB.employees.find(e=>e.id===empId);
   if(!emp)return;
@@ -1129,6 +1161,7 @@ async function processSinglePayroll(empId){
 }
 
 async function processAllPayroll(){
+  if(!canEdit())return;
   if(!confirm('Process payroll for all active employees this month?'))return;
   const m=currentMonth();
   const activeEmps=DB.employees.filter(e=>e.status==='Active');
@@ -1146,6 +1179,7 @@ async function processAllPayroll(){
 }
 
 async function undoPayroll(payrollId){
+  if(!canEdit())return;
   const p=DB.payroll.find(x=>x.id===payrollId);
   if(!p)return;
   if(p.disbursementStatus==='released'){toast('Cannot undo a released payroll.','error');return;}
@@ -1199,6 +1233,7 @@ function calcEditNetPay(){
   document.getElementById('ep_netpay_preview').textContent=fmt(net);
 }
 async function savePayrollEdit(){
+  if(!canEdit())return;
   const payrollId=document.getElementById('ep_id').value;
   const p=DB.payroll.find(x=>x.id===payrollId);
   if(!p){toast('Payroll record not found','error');return;}
@@ -1432,7 +1467,7 @@ function renderMyLeaves(){
           ${rejected.length?`<span style="background:#f8d7da;color:#721c24;border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">❌ ${rejected.length} Rejected</span>`:''}
         </div>
       </div>
-      <button class="btn btn-primary" onclick="openMyLeaveModal()">+ File Leave</button>
+      ${currentRole!=='viewer'?`<button class="btn btn-primary" onclick="openMyLeaveModal()">+ File Leave</button>`:''}
     </div>
 
     <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:20px 22px;margin-bottom:16px">
@@ -1515,7 +1550,7 @@ function renderMyClaims(){
   document.getElementById('content').innerHTML=`
     <div class="section-header">
       <div><div class="section-title">My Expense Claims</div><div class="section-sub">${myClaims.length} total · ${myClaims.filter(c=>c.status==='Pending').length} pending</div></div>
-      <button class="btn btn-primary" onclick="openMyClaimModal()">+ File Claim</button>
+      ${currentRole!=='viewer'?`<button class="btn btn-primary" onclick="openMyClaimModal()">+ File Claim</button>`:''}
     </div>
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Filed</th></tr></thead><tbody>
     ${myClaims.length?myClaims.map(c=>`<tr>
