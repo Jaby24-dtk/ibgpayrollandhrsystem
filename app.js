@@ -135,15 +135,18 @@ function canViewAll(){return currentRole==='admin'||currentRole==='viewer';}
 // delegated listener below.
 // ═══════════════════════════════════════════════
 function act(fn,...args){return `data-act="${fn}" data-args='${JSON.stringify(args).replace(/'/g,'&#39;')}'`;}
-document.addEventListener('click', function(e){
+function dispatchAct(e){
   const el = e.target.closest('[data-act]');
   if(!el) return;
   const fn = el.getAttribute('data-act');
   let args = [];
   const raw = el.getAttribute('data-args');
   if(raw) args = JSON.parse(raw.replace(/&#39;/g,"'"));
+  if(e.type==='change') args = [...args, el.value];
   if(typeof window[fn]==='function') window[fn](...args);
-});
+}
+document.addEventListener('click', dispatchAct);
+document.addEventListener('change', dispatchAct);
 
 // ═══════════════════════════════════════════════
 // AUTH — WEBAUTHN + EMAIL OTP FALLBACK
@@ -591,11 +594,12 @@ function computePayroll(emp,month){
 // ═══════════════════════════════════════════════
 // APP SHELL & NAVIGATION
 // ═══════════════════════════════════════════════
-const pageTitles={dashboard:'Dashboard',employees:'Employee Directory',attendance:'Attendance — DTR',leaves:'Leave Management',claims:'Claims & Expenses',payroll:'Process Payroll',payslips:'Payslips',thirteenth:'13th Month Pay',reports:'Payroll Reports','my-leaves':'My Leave Requests','my-claims':'My Expense Claims','my-payslips':'My Payslips'};
+const pageTitles={dashboard:'Dashboard',employees:'Employee Directory',roles:'User Roles & Access',attendance:'Attendance — DTR',leaves:'Leave Management',claims:'Claims & Expenses',payroll:'Process Payroll',payslips:'Payslips',thirteenth:'13th Month Pay',reports:'Payroll Reports','my-leaves':'My Leave Requests','my-claims':'My Expense Claims','my-payslips':'My Payslips'};
 
 const NAV_ICONS = {
   dashboard:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   employees:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  roles:'<path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M9 12l2 2 4-4"/>',
   attendance:'<circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>',
   leaves:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
   claims:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>',
@@ -643,7 +647,7 @@ function renderAppShell(){
   const navEl = document.getElementById('sidebarNav');
   if(canViewAll()){
     navEl.innerHTML=
-      navSectionHtml('main','Main', navItemHtml('dashboard','Dashboard')+navItemHtml('employees','Employees'))+
+      navSectionHtml('main','Main', navItemHtml('dashboard','Dashboard')+navItemHtml('employees','Employees')+navItemHtml('roles','User Roles'))+
       navSectionHtml('workforce','Workforce', navItemHtml('attendance','Attendance DTR')+navItemHtml('leaves','Leave Management')+navItemHtml('claims','Claims & Expenses'))+
       navSectionHtml('payroll','Payroll', navItemHtml('payroll','Process Payroll')+navItemHtml('payslips','Payslips')+navItemHtml('thirteenth','13th Month Pay')+navItemHtml('reports','Reports'))+
       navSectionHtml('portal','My Portal', navItemHtml('my-profile','My Details')+navItemHtml('my-attendance','My Attendance')+navItemHtml('my-leaves','My Leaves')+navItemHtml('my-claims','My Claims')+navItemHtml('my-payslips','My Payslips')+navItemHtml('my-13th','My 13th Month'));
@@ -662,7 +666,7 @@ function nav(page){
   highlightActiveNav();
   document.getElementById('pageTitle').textContent=pageTitles[page]||page;
   const renders={
-    dashboard:renderDashboard,employees:renderEmployees,attendance:renderAttendance,
+    dashboard:renderDashboard,employees:renderEmployees,roles:renderUserRoles,attendance:renderAttendance,
     leaves:renderLeaves,claims:renderClaims,payroll:renderPayroll,
     payslips:renderPayslips,thirteenth:renderThirteenth,reports:renderReports,
     'my-leaves':renderMyLeaves,'my-claims':renderMyClaims,'my-payslips':renderMyPayslips,
@@ -741,8 +745,31 @@ function renderEmployees(){
       <td><span class="badge badge-${e.emptype==='Regular'?'green':e.emptype==='Probationary'?'amber':'gray'}">${e.emptype||'—'}</span></td>
       <td>${fmt(e.salary)}</td>
       <td>${statusBadge(e.status||'Active')}</td>
-      <td>${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editEmployee',e.id)}>✏️</button> <button class="btn btn-danger btn-sm" ${act('deleteEmployee',e.id)}>🗑️</button> <button class="btn btn-ghost btn-sm" ${act('inviteEmployee',e.id)} title="Send login invite email">✉️</button>`:''}</td>
+      <td>${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editEmployee',e.id)}>✏️</button> <button class="btn btn-danger btn-sm" ${act('deleteEmployee',e.id)}>🗑️</button>`:''}</td>
     </tr>`).join(''):'<tr><td colspan="9" class="no-data"><div class="no-data-icon">👥</div>No employees yet. Add your first employee.</td></tr>'}
+    </tbody></table></div>`;
+}
+
+function renderUserRoles(){
+  const roleLabel={admin:'Admin',viewer:'Viewer',employee:'Employee'};
+  const roleBadge={admin:'badge-green',viewer:'badge-purple',employee:'badge-gray'};
+  document.getElementById('content').innerHTML=`
+    <div class="section-header">
+      <div><div class="section-title">User Roles & Access</div><div class="section-sub">${DB.employees.length} accounts</div></div>
+    </div>
+    <div class="info-box"><strong>Admin</strong> — full access, can manage employees, payroll, and roles. <strong>Employee</strong> — self-service only (own attendance, leaves, claims, payslips). <strong>Viewer</strong> — read-only access to everything an admin sees, no editing.</div>
+    <div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Login Status</th>${canEdit()?'<th>Actions</th>':''}</tr></thead><tbody>
+    ${DB.employees.length?DB.employees.map(e=>`<tr>
+      <td>${esc(e.name)}</td>
+      <td>${esc(e.email||'—')}</td>
+      <td>${canEdit()?`<select ${act('updateEmployeeRole',e.id)}>
+        <option value="employee"${e.role==='employee'||!e.role?' selected':''}>Employee</option>
+        <option value="admin"${e.role==='admin'?' selected':''}>Admin</option>
+        <option value="viewer"${e.role==='viewer'?' selected':''}>Viewer</option>
+      </select>`:`<span class="badge ${roleBadge[e.role]||'badge-gray'}">${roleLabel[e.role]||'Employee'}</span>`}</td>
+      <td>${e.user_id?'<span class="badge badge-green">Linked</span>':'<span class="badge badge-amber">Not yet logged in</span>'}</td>
+      ${canEdit()?`<td><button class="btn btn-ghost btn-sm" ${act('inviteEmployee',e.id)} title="Set password or send invite">✉️ Provision Login</button></td>`:''}
+    </tr>`).join(''):'<tr><td colspan="5" class="no-data">No accounts yet.</td></tr>'}
     </tbody></table></div>`;
 }
 
@@ -857,6 +884,24 @@ async function deleteEmployee(id){
   DB.employees=DB.employees.filter(e=>e.id!==id);
   toast('Employee deleted.');
   renderEmployees();
+}
+
+async function updateEmployeeRole(id,role){
+  if(!canEdit())return;
+  const emp=DB.employees.find(e=>e.id===id);
+  if(!emp)return;
+  if(currentEmployee&&currentEmployee.id===id&&!confirm('This is your own account. Changing your role may remove your admin access immediately. Continue?')){
+    refreshPage();
+    return;
+  }
+  showLoading(true);
+  const {error}=await sb.from('employees').update({role}).eq('id',id);
+  showLoading(false);
+  if(error){toast(error.message,'error');refreshPage();return;}
+  emp.role=role;
+  if(currentEmployee&&currentEmployee.id===id)currentEmployee.role=role;
+  toast(emp.name.split(',')[0]+"'s role set to "+role);
+  refreshPage();
 }
 
 let pendingInviteEmpId = null;
