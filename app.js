@@ -622,7 +622,7 @@ const NAV_ICONS = {
 function navItemHtml(page,label){
   return `<div class="sb-item" ${act('nav',page)}><span class="icon"><svg viewBox="0 0 24 24">${NAV_ICONS[page]}</svg></span>${label}</div>`;
 }
-let collapsedSections = new Set();
+let collapsedSections = new Set(['main','workforce','payroll','portal','account']);
 function navSectionHtml(id,title,itemsHtml){
   const collapsed = collapsedSections.has(id);
   return `<div class="sb-section" ${act('toggleSection',id)}><span class="sb-chevron${collapsed?'':' open'}">›</span>${title}</div>
