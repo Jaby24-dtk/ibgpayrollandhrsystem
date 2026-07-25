@@ -477,12 +477,12 @@ function toast(msg,type='success'){
 function normAtt(r){return{id:r.id,empId:r.emp_id,date:r.date,timeIn:r.time_in,timeOut:r.time_out,status:r.status,ot:r.ot,remarks:r.remarks};}
 function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date,to:r.to_date,reason:r.reason,pay:r.pay,status:r.status,filed:r.filed_date};}
 function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
-function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
+function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,disbursementMethod:r.disbursement_method,disbursementNote:r.disbursement_note,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
 
 function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
 function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
 function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
-function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
+function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,disbursement_method:r.disbursementMethod||null,disbursement_note:r.disbursementNote||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
 
 // ═══════════════════════════════════════════════
 // LOAD DATA FROM SUPABASE
@@ -1236,9 +1236,14 @@ async function updateClaim(id,status){
 // ═══════════════════════════════════════════════
 function disburseBadge(status){
   if(status==='disbursed')return`<span class="badge badge-green">💸 Disbursed</span>`;
+  if(status==='released')return`<span class="badge badge-green">✅ Released</span>`;
   if(status==='processing')return`<span class="badge" style="background:#fff3cd;color:#856404">⏳ Processing</span>`;
   if(status==='failed')return`<span class="badge" style="background:#f8d7da;color:#842029">❌ Failed</span>`;
   return`<span class="badge badge-gray">Pending</span>`;
+}
+function disbursementMethodLabel(method){
+  const m={wise:'Wise',manual_bank:'Bank Transfer (Manual)',cash:'Cash',gcash:'GCash',maya:'Maya',gotyme:'GoTyme',other:'Other'};
+  return m[method]||'';
 }
 function renderPayroll(){
   const m=currentMonth();
@@ -1259,7 +1264,7 @@ function renderPayroll(){
       const p=processed.find(x=>x.empId===e.id&&x.period===period);
       const periodTag=period==='1'?'1st Half':period==='2'?'2nd Half':'Full Month';
       const basic=period==='1'||period==='2'?e.salary/2:e.salary;
-      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${periodTag}</td><td>${fmt(basic)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
+      if(p)return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${periodTag}</td><td>${fmt(basic)}</td><td>${fmt(p.grossPay)}</td><td>${fmt(p.allowances)}</td><td>${fmt(p.totalStatutory+p.absentDed+p.lateDed+p.halfDed)}</td><td>${fmt(p.withholdingTax)}</td><td><strong>${fmt(p.netPay)}</strong></td><td><span class="badge badge-green">Processed</span></td><td>${disburseBadge(p.disbursementStatus)}${disbursementMethodLabel(p.disbursementMethod)?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${disbursementMethodLabel(p.disbursementMethod)}</div>`:''}${p.disbursementDate?`<div style="font-size:10px;color:#9a7f87;margin-top:2px">${fmtDate(p.disbursementDate)}</div>`:''}</td><td style="white-space:nowrap"><button class="btn btn-ghost btn-sm" ${act('viewPayslip',p.id)}>👁️</button> ${canEdit()?`<button class="btn btn-ghost btn-sm" ${act('editPayroll',p.id)} title="Edit payroll entry">✏️</button>${(p.disbursementStatus==='pending'||p.disbursementStatus==='failed')?` <button class="btn btn-ghost btn-sm" ${act('openReleaseModal',p.id)} title="Release payment">💸</button>`:''}${p.disbursementStatus!=='released'?` <button class="btn btn-ghost btn-sm" ${act('undoPayroll',p.id)} title="Undo / delete this payroll entry" style="color:#dc3545">🗑️</button>`:''}`:''}</td></tr>`;
       const comp=computePayroll(e,m,period);
       return`<tr><td><strong>${esc(e.id)}</strong> ${esc(e.name.split(',')[0])}<div style="font-size:10px;color:#9a7f87;margin-top:2px">${channelLabel(e.payment_channel||'bank')}</div></td><td>${periodTag}</td><td>${fmt(basic)}</td><td>${fmt(comp.grossPay)}</td><td>${fmt(comp.allowances)}</td><td>${fmt(comp.totalStatutory+comp.absentDed+comp.lateDed+comp.halfDed)}</td><td>${fmt(comp.withholdingTax)}</td><td><strong>${fmt(comp.netPay)}</strong></td><td><span class="badge badge-gray">Pending</span></td><td>—</td><td>${canEdit()?`<button class="btn btn-primary btn-sm" ${act('processSinglePayroll',e.id,period)}>▶</button>`:''}</td></tr>`;
     }).join(''):'<tr><td colspan="11" class="no-data">No active employees.</td></tr>'}
@@ -1276,24 +1281,24 @@ async function releasePayroll(payrollIds){
   if(!canEdit())return;
   if(!payrollIds||payrollIds.length===0){toast('No payroll records to release','error');return;}
   // Split by payment channel
-  const bankIds=[],manualIds=[];
+  const bankIds=[],manualIds=[],manualMethod={};
   for(const id of payrollIds){
     const p=DB.payroll.find(x=>x.id===id);
     const e=p?DB.employees.find(x=>x.id===p.empId):null;
     const ch=e?.payment_channel||'bank';
-    if(ch==='bank'){bankIds.push(id);}else{manualIds.push(id);}
+    if(ch==='bank'){bankIds.push(id);}else{manualIds.push(id);manualMethod[id]=ch;}
   }
   const allNames=payrollIds.map(id=>{const p=DB.payroll.find(x=>x.id===id);const e=p?DB.employees.find(x=>x.id===p.empId):null;return e?`${e.name.split(',')[0]} (${channelLabel(e.payment_channel||'bank')})`:id;});
-  if(!confirm(`Release payroll for:\n${allNames.join('\n')}\n\nBank Transfer employees will be sent via Wise.\nGCash/Maya/GoTyme/Cash will be marked as released (manual disbursement). Proceed?`))return;
+  if(!confirm(`Release payroll for:\n${allNames.join('\n')}\n\nBank Transfer employees will be sent via Wise. To mark a bank-transfer payment as sent manually instead, use the ✅ Mark Sent button on that row.\nGCash/Maya/GoTyme/Cash will be marked as released (manual disbursement). Proceed?`))return;
   showLoading(true);
   try{
     // Handle manual channels (GCash, Maya, GoTyme, Cash) — mark released immediately
     if(manualIds.length>0){
       const now=new Date().toISOString().slice(0,10);
       for(const id of manualIds){
-        await sb.from('payroll').update({disbursement_status:'released',disbursement_date:now}).eq('id',id);
+        await sb.from('payroll').update({disbursement_status:'released',disbursement_date:now,disbursement_method:manualMethod[id]}).eq('id',id);
         const idx=DB.payroll.findIndex(p=>p.id===id);
-        if(idx>=0){DB.payroll[idx].disbursementStatus='released';DB.payroll[idx].disbursementDate=now;}
+        if(idx>=0){DB.payroll[idx].disbursementStatus='released';DB.payroll[idx].disbursementDate=now;DB.payroll[idx].disbursementMethod=manualMethod[id];}
       }
     }
     // Handle bank transfer via Wise
@@ -1309,6 +1314,7 @@ async function releasePayroll(payrollIds){
         const idx=DB.payroll.findIndex(p=>p.id===r.id);
         if(idx>=0){
           DB.payroll[idx].disbursementStatus=r.error?'failed':'processing';
+          if(!r.error){DB.payroll[idx].disbursementMethod='wise';await sb.from('payroll').update({disbursement_method:'wise'}).eq('id',r.id);}
           if(r.transfer_id)DB.payroll[idx].wiseTransferId=String(r.transfer_id);
         }
       }
@@ -1321,6 +1327,47 @@ async function releasePayroll(payrollIds){
     showLoading(false);
     renderPayroll();
   }catch(err){showLoading(false);toast(err.message,'error');}
+}
+
+let pendingReleaseId=null;
+function openReleaseModal(payrollId){
+  if(!canEdit())return;
+  const p=DB.payroll.find(x=>x.id===payrollId);
+  if(!p)return;
+  const e=DB.employees.find(x=>x.id===p.empId);
+  const channel=e?.payment_channel||'bank';
+  pendingReleaseId=payrollId;
+  document.getElementById('rel_emp').value=e?e.name:'—';
+  document.getElementById('rel_amount').value=fmt(p.netPay);
+  document.getElementById('rel_method').value=channel!=='bank'?channel:'manual_bank';
+  document.getElementById('rel_note').value='';
+  document.getElementById('releaseErr').style.display='none';
+  document.getElementById('rel_wise_group').style.display=channel==='bank'?'block':'none';
+  openModal('releaseModal');
+}
+async function submitWiseRelease(){
+  if(!canEdit())return;
+  const id=pendingReleaseId;
+  if(!id)return;
+  closeModal('releaseModal');
+  await releasePayroll([id]);
+}
+async function submitMarkSent(){
+  if(!canEdit())return;
+  const id=pendingReleaseId;
+  const p=DB.payroll.find(x=>x.id===id);
+  if(!p)return;
+  const method=document.getElementById('rel_method').value;
+  const note=document.getElementById('rel_note').value.trim();
+  showLoading(true);
+  const now=new Date().toISOString().slice(0,10);
+  const {error}=await sb.from('payroll').update({disbursement_status:'released',disbursement_date:now,disbursement_method:method,disbursement_note:note||null}).eq('id',id);
+  showLoading(false);
+  if(error){document.getElementById('releaseErr').textContent=error.message;document.getElementById('releaseErr').style.display='block';return;}
+  p.disbursementStatus='released';p.disbursementDate=now;p.disbursementMethod=method;p.disbursementNote=note||null;
+  closeModal('releaseModal');
+  toast('Marked as sent via '+disbursementMethodLabel(method));
+  refreshPage();
 }
 
 async function processSinglePayroll(empId,period='full'){
@@ -1940,5 +1987,9 @@ function renderMy13th(){
     document.getElementById('inv_method').addEventListener("change", (e) => { onInviteMethodChange() });
     document.getElementById('_ev_31').addEventListener("click", (e) => { togglePasswordVisibility('inv_password','_ev_31') });
     document.getElementById('_ev_32').addEventListener("click", (e) => { togglePasswordVisibility('inv_password2','_ev_32') });
+    document.getElementById('_ev_33').addEventListener("click", (e) => { closeModal('releaseModal') });
+    document.getElementById('_ev_34').addEventListener("click", (e) => { submitWiseRelease() });
+    document.getElementById('_ev_35').addEventListener("click", (e) => { closeModal('releaseModal') });
+    document.getElementById('_ev_36').addEventListener("click", (e) => { submitMarkSent() });
   });
 })();

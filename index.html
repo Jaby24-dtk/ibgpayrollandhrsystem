@@ -542,6 +542,34 @@ tr:hover td{background:var(--blush2)}
 </div>
 </div>
 </div>
+<!-- Release Payment Modal -->
+<div class="modal-overlay" id="releaseModal">
+<div class="modal" style="width:420px">
+<div class="modal-header"><h3>Release Payment</h3><button class="modal-close" id="_ev_33">✕</button></div>
+<div class="modal-body">
+<div class="form-grid">
+<div class="form-group span-2"><label>Employee</label><input id="rel_emp" disabled/></div>
+<div class="form-group span-2"><label>Net Pay</label><input id="rel_amount" disabled/></div>
+<div class="form-group span-2" id="rel_wise_group"><button class="btn btn-primary" style="width:100%" id="_ev_34">💸 Send via Wise</button></div>
+<div class="form-group span-2" style="text-align:center;color:#9a7f87;font-size:12px">— or mark as already sent —</div>
+<div class="form-group span-2"><label>Method</label><select id="rel_method">
+<option value="manual_bank">Bank Transfer (Manual)</option>
+<option value="cash">Cash</option>
+<option value="gcash">GCash</option>
+<option value="maya">Maya</option>
+<option value="gotyme">GoTyme</option>
+<option value="other">Other</option>
+</select></div>
+<div class="form-group span-2"><label>Reference / Note (optional)</label><input id="rel_note" placeholder="e.g. BPI ref #12345"/></div>
+</div>
+<div class="login-err" id="releaseErr" style="display:none"></div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-ghost" id="_ev_35">Cancel</button>
+<button class="btn btn-primary" id="_ev_36">✅ Mark as Sent</button>
+</div>
+</div>
+</div>
 <script crossorigin="anonymous" integrity="sha384-cztVf4nptt4arwI8Ixfn8naubPgxH22BSvA0CuqFUCulIT+dgnb18vSqiZbbPDL1" src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.js"></script>
 <script defer src="app.js"></script></body>
 </html>
