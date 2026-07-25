@@ -841,9 +841,10 @@ async function saveEmployee(){
   if(error){toast(error.message,'error');return;}
   const idx=DB.employees.findIndex(e=>e.id===emp.id);
   if(idx>=0)DB.employees[idx]=emp; else DB.employees.push(emp);
+  if(currentEmployee&&currentEmployee.id===emp.id)currentEmployee=emp;
   closeModal('empModal');
   toast(editId?'Employee updated!':'Employee added!');
-  renderEmployees();
+  refreshPage();
 }
 
 async function deleteEmployee(id){
@@ -858,23 +859,54 @@ async function deleteEmployee(id){
   renderEmployees();
 }
 
-async function inviteEmployee(id){
+let pendingInviteEmpId = null;
+function inviteEmployee(id){
   if(!canEdit())return;
   const emp=DB.employees.find(e=>e.id===id);
   if(!emp||!emp.email){toast('This employee has no email on file.','error');return;}
-  if(!confirm(`Send a login-setup email to ${emp.email}?`))return;
+  pendingInviteEmpId=id;
+  document.getElementById('inv_email').value=emp.email;
+  document.getElementById('inv_method').value='password';
+  document.getElementById('inv_password').value='';
+  document.getElementById('inv_password2').value='';
+  document.getElementById('inviteErr').style.display='none';
+  onInviteMethodChange();
+  openModal('inviteModal');
+}
+function onInviteMethodChange(){
+  const isPw=document.getElementById('inv_method').value==='password';
+  document.getElementById('inv_pw1_group').style.display=isPw?'block':'none';
+  document.getElementById('inv_pw2_group').style.display=isPw?'block':'none';
+  document.getElementById('inv_email_note').style.display=isPw?'none':'block';
+}
+async function submitInviteModal(){
+  if(!canEdit())return;
+  const emp=DB.employees.find(e=>e.id===pendingInviteEmpId);
+  const err=document.getElementById('inviteErr');
+  err.style.display='none';
+  if(!emp){return;}
+  const method=document.getElementById('inv_method').value;
+  const body={email:emp.email};
+  if(method==='password'){
+    const pw=document.getElementById('inv_password').value;
+    const pw2=document.getElementById('inv_password2').value;
+    if(!pw||pw.length<8){err.textContent='Password must be at least 8 characters.';err.style.display='block';return;}
+    if(pw!==pw2){err.textContent='Passwords do not match.';err.style.display='block';return;}
+    body.password=pw;
+  }
   showLoading(true);
   try{
     const res=await fetch('https://gxtyhkwpctupbcydfuud.supabase.co/functions/v1/invite-user',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
-      body:JSON.stringify({email:emp.email})
+      body:JSON.stringify(body)
     });
     const data=await res.json();
     showLoading(false);
-    if(!res.ok){toast(data.error||'Could not send invite','error');return;}
-    toast('Invite sent to '+emp.email);
-  }catch(err){showLoading(false);toast(err.message||'Could not send invite','error');}
+    if(!res.ok){err.textContent=data.error||'Could not provision login';err.style.display='block';return;}
+    closeModal('inviteModal');
+    toast(method==='password'?'Password set for '+emp.email:'Invite sent to '+emp.email);
+  }catch(e){showLoading(false);err.textContent=e.message||'Could not provision login';err.style.display='block';}
 }
 
 // ═══════════════════════════════════════════════
@@ -1629,7 +1661,7 @@ function renderMyPayslips(){
 function renderMyProfile(){
   const e=currentEmployee;
   document.getElementById('content').innerHTML=`
-    <div class="section-header"><div><div class="section-title">My Details</div><div class="section-sub">${e.id}</div></div></div>
+    <div class="section-header"><div><div class="section-title">My Details</div><div class="section-sub">${e.id}</div></div>${canEdit()?`<button class="btn btn-primary" ${act('editEmployee',e.id)}>✏️ Edit</button>`:''}</div>
     <div style="max-width:600px;background:#fff;border-radius:12px;border:1px solid var(--border);padding:28px">
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
         <div style="width:64px;height:64px;border-radius:50%;background:var(--maroon);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700">${initials(e.name)}</div>
@@ -1785,5 +1817,9 @@ function renderMy13th(){
     document.getElementById('_ev_25').addEventListener("click", (e) => { closeModal('payslipModal') });
     document.getElementById('_ev_26').addEventListener("click", (e) => { closeModal('payslipModal') });
     document.getElementById('_ev_27').addEventListener("click", (e) => { window.print() });
+    document.getElementById('_ev_28').addEventListener("click", (e) => { closeModal('inviteModal') });
+    document.getElementById('_ev_29').addEventListener("click", (e) => { closeModal('inviteModal') });
+    document.getElementById('_ev_30').addEventListener("click", (e) => { submitInviteModal() });
+    document.getElementById('inv_method').addEventListener("change", (e) => { onInviteMethodChange() });
   });
 })();

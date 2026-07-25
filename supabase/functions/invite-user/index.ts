@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
   if (empErr) return json({ error: 'Could not verify caller role' }, 500);
   if (!callerEmp || callerEmp.role !== 'admin') return json({ error: 'Admin access required' }, 403);
 
-  let body: { email?: string };
+  let body: { email?: string; password?: string };
   try {
     body = await req.json();
   } catch {
@@ -56,13 +56,44 @@ Deno.serve(async (req) => {
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return json({ error: 'A valid email is required' }, 400);
   }
+  const password = body.password;
+  if (password !== undefined && password.length < 8) {
+    return json({ error: 'Password must be at least 8 characters' }, 400);
+  }
 
   // Service-role client — only place the secret key is used, never returned to caller.
   const adminClient = createClient(supabaseUrl, serviceKey);
+
+  if (password) {
+    // Set a password directly — no email sent, so this isn't subject to the
+    // project's (often very low, free-tier) email-sending rate limit.
+    const { error: createErr } = await adminClient.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+    });
+    if (!createErr) return json({ ok: true, mode: 'created' });
+
+    const alreadyExists = /already.*registered|already.*exists/i.test(createErr.message);
+    if (!alreadyExists) return json({ error: createErr.message }, 400);
+
+    // Existing auth user for this email — update their password instead.
+    const { data: list, error: listErr } = await adminClient.auth.admin.listUsers({ perPage: 1000 });
+    if (listErr) return json({ error: listErr.message }, 500);
+    const existing = list.users.find((u) => (u.email || '').toLowerCase() === email);
+    if (!existing) return json({ error: 'Could not locate existing account for this email' }, 500);
+
+    const { error: updateErr } = await adminClient.auth.admin.updateUserById(existing.id, {
+      password,
+      email_confirm: true,
+    });
+    if (updateErr) return json({ error: updateErr.message }, 400);
+    return json({ ok: true, mode: 'updated' });
+  }
+
   const { error: inviteErr } = await adminClient.auth.admin.inviteUserByEmail(email, {
     redirectTo: ALLOWED_ORIGIN + '/',
   });
-
   if (inviteErr) return json({ error: inviteErr.message }, 400);
-  return json({ ok: true });
+  return json({ ok: true, mode: 'invited' });
 });
