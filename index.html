@@ -520,8 +520,18 @@ tr:hover td{background:var(--blush2)}
 <option value="email">Send invite email</option>
 </select></div>
 <div class="form-group span-2" id="inv_email_note" style="display:none;background:var(--blush2);border-radius:8px;padding:10px 12px;font-size:12px;color:#7a1c3a">This project's email sending is rate-limited (free-tier default SMTP) — invite emails may fail. "Set a password now" is more reliable.</div>
-<div class="form-group" id="inv_pw1_group"><label>Password</label><input id="inv_password" type="password"/></div>
-<div class="form-group" id="inv_pw2_group"><label>Confirm Password</label><input id="inv_password2" type="password"/></div>
+<div class="form-group" id="inv_pw1_group"><label>Password</label>
+<div style="position:relative">
+<input id="inv_password" type="password" style="padding-right:38px"/>
+<button type="button" id="_ev_31" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;padding:4px 6px">👁️</button>
+</div>
+</div>
+<div class="form-group" id="inv_pw2_group"><label>Confirm Password</label>
+<div style="position:relative">
+<input id="inv_password2" type="password" style="padding-right:38px"/>
+<button type="button" id="_ev_32" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:15px;padding:4px 6px">👁️</button>
+</div>
+</div>
 </div>
 <div class="login-err" id="inviteErr" style="display:none"></div>
 </div>

@@ -919,6 +919,10 @@ function inviteEmployee(id){
   document.getElementById('inv_method').value='password';
   document.getElementById('inv_password').value='';
   document.getElementById('inv_password2').value='';
+  document.getElementById('inv_password').type='password';
+  document.getElementById('inv_password2').type='password';
+  document.getElementById('_ev_31').textContent='👁️';
+  document.getElementById('_ev_32').textContent='👁️';
   document.getElementById('inviteErr').style.display='none';
   onInviteMethodChange();
   openModal('inviteModal');
@@ -928,6 +932,13 @@ function onInviteMethodChange(){
   document.getElementById('inv_pw1_group').style.display=isPw?'block':'none';
   document.getElementById('inv_pw2_group').style.display=isPw?'block':'none';
   document.getElementById('inv_email_note').style.display=isPw?'none':'block';
+}
+function togglePasswordVisibility(inputId,btnId){
+  const input=document.getElementById(inputId);
+  const btn=document.getElementById(btnId);
+  const showing=input.type==='text';
+  input.type=showing?'password':'text';
+  btn.textContent=showing?'👁️':'🙈';
 }
 async function submitInviteModal(){
   if(!canEdit())return;
@@ -1871,5 +1882,7 @@ function renderMy13th(){
     document.getElementById('_ev_29').addEventListener("click", (e) => { closeModal('inviteModal') });
     document.getElementById('_ev_30').addEventListener("click", (e) => { submitInviteModal() });
     document.getElementById('inv_method').addEventListener("change", (e) => { onInviteMethodChange() });
+    document.getElementById('_ev_31').addEventListener("click", (e) => { togglePasswordVisibility('inv_password','_ev_31') });
+    document.getElementById('_ev_32').addEventListener("click", (e) => { togglePasswordVisibility('inv_password2','_ev_32') });
   });
 })();
