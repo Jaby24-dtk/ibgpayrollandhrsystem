@@ -138,6 +138,11 @@ function act(fn,...args){return `data-act="${fn}" data-args='${JSON.stringify(ar
 function dispatchAct(e){
   const el = e.target.closest('[data-act]');
   if(!el) return;
+  const isFormEl = el.tagName==='SELECT'||el.tagName==='INPUT'||el.tagName==='TEXTAREA';
+  // Selects/inputs only act on 'change' (a 'click' just opens/focuses them);
+  // everything else (buttons, divs) only acts on 'click'.
+  if(isFormEl && e.type!=='change') return;
+  if(!isFormEl && e.type!=='click') return;
   const fn = el.getAttribute('data-act');
   let args = [];
   const raw = el.getAttribute('data-args');
