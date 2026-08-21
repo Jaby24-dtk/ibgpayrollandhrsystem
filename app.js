@@ -1927,6 +1927,7 @@ function renderMy13th(){
     document.getElementById('tabSignUp').addEventListener("click", (e) => { switchTab('up') });
     document.getElementById('loginPass').addEventListener("keydown", (event) => { if(event.key==='Enter')doAuth() });
     document.getElementById('authBtn').addEventListener("click", (e) => { doAuth() });
+    document.getElementById('forgotPasswordBtn').addEventListener("click", (e) => { e.preventDefault(); forgotPassword() });
     document.getElementById('bioAuthBtn').addEventListener("click", (e) => { doAuthBiometric() });
     document.getElementById('_ev_1').addEventListener("click", (e) => { backFromBioAuth() });
     document.getElementById('_ev_2').addEventListener("click", (e) => { skipBioAuth() });
