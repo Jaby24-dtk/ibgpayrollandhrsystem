@@ -1512,6 +1512,7 @@ function viewPayslip(payrollId){
   const commission=parseFloat(p.commission||0);
   const displayGrossPay=parseFloat(p.grossPay||0)+commission;
   const displayEmployerCost=parseFloat(p.totalEmployerCost||0)+commission;
+  const displayTaxableIncome=parseFloat(p.taxableIncome||0)+commission;
   document.getElementById('payslipContent').innerHTML=`
     <div style="padding:32px;font-family:'Inter',sans-serif">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #f0dde4">
@@ -1541,7 +1542,7 @@ function viewPayslip(payrollId){
           ${row('SSS',fmt(p.sss))}${row('PhilHealth',fmt(p.phic))}${row('Pag-IBIG',fmt(p.hdmf))}
           <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4">
             <div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Withholding Tax (TRAIN Law)</div>
-            <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;color:#9a7f87"><span>Taxable Income</span><span>${fmt(p.taxableIncome||0)}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;color:#9a7f87"><span>Taxable Income</span><span>${fmt(displayTaxableIncome)}</span></div>
             <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">Withholding Tax</span><span style="${parseFloat(p.withholdingTax)>0?'color:#dc3545;font-weight:600':'color:#28a745'}">${parseFloat(p.withholdingTax)>0?fmt(p.withholdingTax):'PHP 0.00 - Exempt'}</span></div>
           </div>
           ${parseFloat(p.absentDed)>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4"><div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Other Deductions</div>`:''}
