@@ -477,12 +477,12 @@ function toast(msg,type='success'){
 function normAtt(r){return{id:r.id,empId:r.emp_id,date:r.date,timeIn:r.time_in,timeOut:r.time_out,status:r.status,ot:r.ot,remarks:r.remarks};}
 function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date,to:r.to_date,reason:r.reason,pay:r.pay,status:r.status,filed:r.filed_date};}
 function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
-function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,disbursementMethod:r.disbursement_method,disbursementNote:r.disbursement_note,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
+function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,commission:r.commission||0,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,disbursementMethod:r.disbursement_method,disbursementNote:r.disbursement_note,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
 
 function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
 function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
 function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
-function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,disbursement_method:r.disbursementMethod||null,disbursement_note:r.disbursementNote||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
+function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,commission:r.commission||0,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,disbursement_method:r.disbursementMethod||null,disbursement_note:r.disbursementNote||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
 
 // ═══════════════════════════════════════════════
 // LOAD DATA FROM SUPABASE
@@ -627,7 +627,7 @@ function computePayroll(emp,month,period='full'){
   const approvedClaims=DB.claims.filter(c=>c.empId===emp.id&&c.status==='Approved'&&c.date&&c.date>=start&&c.date<=end).reduce((s,c)=>s+parseFloat(c.amount),0);
   const netPay=grossPay+allowances-totalStatutory-withholdingTax+approvedClaims;
   const totalEmployerCost=grossPay+allowances+sssEr+phicEr+hdmfEr;
-  return{grossPay,allowances,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax,totalStatutory,totalEmployerCost,netPay,otPay,restPay,absentDed,lateDed,halfDed,otHours,absent,lwop,approvedClaims,daily,hourly,taxableIncome,lateHrs,halfDay,restDays};
+  return{grossPay,allowances,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax,totalStatutory,totalEmployerCost,netPay,otPay,restPay,absentDed,lateDed,halfDed,otHours,absent,lwop,approvedClaims,commission:0,daily,hourly,taxableIncome,lateHrs,halfDay,restDays};
 }
 function payPeriodsFor(emp){return emp.pay_frequency==='semi_monthly'?['1','2']:['full'];}
 function periodLabel(period){return period==='1'?' — 1st Half (1–15)':period==='2'?' — 2nd Half (16–end)':'';}
@@ -1445,6 +1445,7 @@ function editPayroll(payrollId){
   document.getElementById('ep_lateded').value=p.lateDed||0;
   document.getElementById('ep_halfded').value=p.halfDed||0;
   document.getElementById('ep_claims').value=p.approvedClaims||0;
+  document.getElementById('ep_commission').value=p.commission||0;
   calcEditNetPay();
   openModal('editPayrollModal');
 }
@@ -1459,7 +1460,8 @@ function calcEditNetPay(){
   const lateDed=parseFloat(document.getElementById('ep_lateded').value)||0;
   const halfDed=parseFloat(document.getElementById('ep_halfded').value)||0;
   const claims=parseFloat(document.getElementById('ep_claims').value)||0;
-  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims;
+  const commission=parseFloat(document.getElementById('ep_commission').value)||0;
+  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims+commission;
   document.getElementById('ep_netpay_preview').textContent=fmt(net);
 }
 async function savePayrollEdit(){
@@ -1480,18 +1482,19 @@ async function savePayrollEdit(){
   const lateDed=parseFloat(document.getElementById('ep_lateded').value)||0;
   const halfDed=parseFloat(document.getElementById('ep_halfded').value)||0;
   const claims=parseFloat(document.getElementById('ep_claims').value)||0;
-  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims;
+  const commission=parseFloat(document.getElementById('ep_commission').value)||0;
+  const net=gross+allow-(sss+phic+hdmf+tax+absDed+lateDed+halfDed)+claims+commission;
   const totalEmployerCost=gross+allow+sssEr+phicEr+hdmfEr;
   const updates={
     gross_pay:gross,allowances:allow,sss,phic,hdmf,sss_er:sssEr,phic_er:phicEr,hdmf_er:hdmfEr,
     withholding_tax:tax,absent_ded:absDed,late_ded:lateDed,half_ded:halfDed,
-    approved_claims:claims,total_statutory:sss+phic+hdmf,total_employer_cost:totalEmployerCost,net_pay:net
+    approved_claims:claims,commission,total_statutory:sss+phic+hdmf,total_employer_cost:totalEmployerCost,net_pay:net
   };
   showLoading(true);
   const {error}=await sb.from('payroll').update(updates).eq('id',payrollId);
   showLoading(false);
   if(error){toast(error.message,'error');return;}
-  Object.assign(p,{grossPay:gross,allowances:allow,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax:tax,absentDed:absDed,lateDed,halfDed,approvedClaims:claims,totalStatutory:sss+phic+hdmf,totalEmployerCost,netPay:net});
+  Object.assign(p,{grossPay:gross,allowances:allow,sss,phic,hdmf,sssEr,phicEr,hdmfEr,withholdingTax:tax,absentDed:absDed,lateDed,halfDed,approvedClaims:claims,commission,totalStatutory:sss+phic+hdmf,totalEmployerCost,netPay:net});
   closeModal('editPayrollModal');
   toast('Payroll updated successfully!');
   renderPayroll();
@@ -1506,6 +1509,9 @@ function viewPayslip(payrollId){
   const emp=DB.employees.find(e=>e.id===p.empId);
   if(!emp)return;
   const fmt=pesoFmt;
+  const commission=parseFloat(p.commission||0);
+  const displayGrossPay=parseFloat(p.grossPay||0)+commission;
+  const displayEmployerCost=parseFloat(p.totalEmployerCost||0)+commission;
   document.getElementById('payslipContent').innerHTML=`
     <div style="padding:32px;font-family:'Inter',sans-serif">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #f0dde4">
@@ -1526,7 +1532,8 @@ function viewPayslip(payrollId){
           ${parseFloat(emp.trans)>0?row('Transportation',fmt(emp.trans)):''}
           ${parseFloat(emp.phone)>0?row('Phone Allowance',fmt(emp.phone)):''}
           ${parseFloat(p.approvedClaims)>0?row('Approved Claims',fmt(p.approvedClaims)):''}
-          <div style="border-top:1px solid #f0dde4;margin-top:8px;padding-top:8px">${row('Gross Pay',`<strong>${fmt(p.grossPay)}</strong>`)}</div>
+          ${commission>0?row(`<strong>Commission</strong>`,`<strong>${fmt(commission)}</strong>`):''}
+          <div style="border-top:1px solid #f0dde4;margin-top:8px;padding-top:8px">${row('Gross Pay',`<strong>${fmt(displayGrossPay)}</strong>`)}</div>
         </div>
         <div>
           <p style="font-weight:700;color:#7a1c3a;margin-bottom:10px;font-size:13px;text-transform:uppercase;letter-spacing:.5px">Deductions</p>
@@ -1549,7 +1556,7 @@ function viewPayslip(payrollId){
             ${row(`<span style="color:#155724">SSS</span>`,`<span style="color:#155724">${fmt(p.sssEr||0)}</span>`)}
             ${row(`<span style="color:#155724">PhilHealth</span>`,`<span style="color:#155724">${fmt(p.phicEr||0)}</span>`)}
             ${row(`<span style="color:#155724">Pag-IBIG</span>`,`<span style="color:#155724">${fmt(p.hdmfEr||0)}</span>`)}
-            <div style="border-top:1px solid #c3e6cb;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#155724;font-weight:700">Total Employer Cost</span><span style="color:#155724;font-weight:700">${fmt(p.totalEmployerCost||0)}</span></div>
+            <div style="border-top:1px solid #c3e6cb;margin-top:6px;padding-top:6px;display:flex;justify-content:space-between;font-size:13px"><span style="color:#155724;font-weight:700">Total Employer Cost</span><span style="color:#155724;font-weight:700">${fmt(displayEmployerCost)}</span></div>
           </div>`:''}
 
         </div>
@@ -1979,6 +1986,7 @@ function renderMy13th(){
     document.getElementById('ep_lateded').addEventListener("input", (e) => { calcEditNetPay() });
     document.getElementById('ep_halfded').addEventListener("input", (e) => { calcEditNetPay() });
     document.getElementById('ep_claims').addEventListener("input", (e) => { calcEditNetPay() });
+    document.getElementById('ep_commission').addEventListener("input", (e) => { calcEditNetPay() });
     document.getElementById('_ev_23').addEventListener("click", (e) => { closeModal('editPayrollModal') });
     document.getElementById('_ev_24').addEventListener("click", (e) => { savePayrollEdit() });
     document.getElementById('_ev_25').addEventListener("click", (e) => { closeModal('payslipModal') });
