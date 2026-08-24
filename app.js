@@ -1505,6 +1505,7 @@ function viewPayslip(payrollId){
   if(!p)return;
   const emp=DB.employees.find(e=>e.id===p.empId);
   if(!emp)return;
+  const fmt=pesoFmt;
   document.getElementById('payslipContent').innerHTML=`
     <div style="padding:32px;font-family:'Inter',sans-serif">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #f0dde4">
@@ -1512,7 +1513,7 @@ function viewPayslip(payrollId){
         <div style="text-align:right"><div style="font-weight:700;color:#7a1c3a;font-size:16px">PAYSLIP</div><div style="font-size:12px;color:#9a7f87">${monthLabel(p.month)}${periodLabel(p.period)}</div><div style="font-size:11px;color:#9a7f87">Processed: ${fmtDate(p.processedDate)}</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
-        <div><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Employee</p><p style="font-weight:700;font-size:16px">${emp.name}</p><p style="color:#9a7f87;font-size:12px">${emp.position} · ${emp.dept}</p><p style="color:#9a7f87;font-size:12px">${emp.id} · ${emp.emptype}</p><p style="color:#9a7f87;font-size:11px;margin-top:2px">${emp.company||'I-BG Consultancy &amp; Trading (S) Pte Ltd'}</p></div>
+        <div><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Employee</p><p style="font-weight:700;font-size:16px">${emp.name}</p><p style="color:#9a7f87;font-size:12px">${emp.position} · ${emp.dept}</p><p style="color:#9a7f87;font-size:12px">${emp.id} · ${emp.emptype}</p><p style="color:#9a7f87;font-size:11px;margin-top:2px">${emp.company||'I-BG Trading and Consultancy Corporation'}</p></div>
         <div style="text-align:right"><p style="font-size:11px;color:#9a7f87;text-transform:uppercase;letter-spacing:.5px">Net Pay</p><p style="font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:#7a1c3a">${fmt(p.netPay)}</p></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
@@ -1534,7 +1535,7 @@ function viewPayslip(payrollId){
           <div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4">
             <div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Withholding Tax (TRAIN Law)</div>
             <div style="display:flex;justify-content:space-between;padding:2px 0;font-size:12px;color:#9a7f87"><span>Taxable Income</span><span>${fmt(p.taxableIncome||0)}</span></div>
-            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">Withholding Tax</span><span style="${parseFloat(p.withholdingTax)>0?'color:#dc3545;font-weight:600':'color:#28a745'}">${parseFloat(p.withholdingTax)>0?fmt(p.withholdingTax):'₱0.00 — Exempt'}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">Withholding Tax</span><span style="${parseFloat(p.withholdingTax)>0?'color:#dc3545;font-weight:600':'color:#28a745'}">${parseFloat(p.withholdingTax)>0?fmt(p.withholdingTax):'PHP 0.00 - Exempt'}</span></div>
           </div>
           ${parseFloat(p.absentDed)>0?`<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #f0dde4"><div style="font-size:10px;color:#9a7f87;margin-bottom:4px;font-style:italic">Other Deductions</div>`:''}
           ${parseFloat(p.absentDed)>0?row('Absent Deduction',fmt(p.absentDed)):''}
@@ -1557,10 +1558,11 @@ function viewPayslip(payrollId){
         <span style="font-weight:700;color:#7a1c3a;font-size:15px">NET PAY</span>
         <span style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7a1c3a">${fmt(p.netPay)}</span>
       </div>
-      <p style="font-size:10px;color:#9a7f87;margin-top:16px;text-align:center">This is a computer-generated payslip. No signature required. · Withholding tax computed per TRAIN Law (RA 10963). Employees earning ≤ ₱250,000/year are tax-exempt.</p>
+      <p style="font-size:10px;color:#9a7f87;margin-top:16px;text-align:center">This is a computer-generated payslip. No signature required. · Withholding tax computed per TRAIN Law (RA 10963). Employees earning ≤ PHP 250,000/year are tax-exempt.</p>
     </div>`;
   openModal('payslipModal');
 }
+function pesoFmt(n){return'PHP '+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function row(label,val){return`<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#9a7f87">${label}</span><span>${val}</span></div>`;}
 
 // ═══════════════════════════════════════════════
