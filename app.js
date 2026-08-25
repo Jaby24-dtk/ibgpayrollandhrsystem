@@ -1533,7 +1533,7 @@ function viewPayslip(payrollId){
           ${parseFloat(emp.trans)>0?row('Transportation',fmt(emp.trans)):''}
           ${parseFloat(emp.phone)>0?row('Phone Allowance',fmt(emp.phone)):''}
           ${parseFloat(p.approvedClaims)>0?row('Approved Claims',fmt(p.approvedClaims)):''}
-          ${commission>0?row(`<strong>Commission</strong>`,`<strong>${fmt(commission)}</strong>`):''}
+          ${row(`<strong>Commission</strong>`,`<strong>${fmt(commission)}</strong>`)}
           <div style="border-top:1px solid #f0dde4;margin-top:8px;padding-top:8px">${row('Gross Pay',`<strong>${fmt(displayGrossPay)}</strong>`)}</div>
         </div>
         <div>
