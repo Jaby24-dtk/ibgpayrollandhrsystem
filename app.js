@@ -246,7 +246,7 @@ async function skipBioAuth(){
   showLoading(true);
   const {error}=await sb.auth.sendOtp(email);
   showLoading(false);
-  if(error){clearAuthState();showScreen('loginScreen');document.getElementById('loginErr').textContent='Could not send code: '+error.message;document.getElementById('loginErr').style.display='block';return;}
+  if(error){ otpSendFailed(error.message); return; }
   pendingOtpEmail=email;
   document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
   showScreen('otpScreen'); setTimeout(()=>document.getElementById('o1').focus(),100);
@@ -258,7 +258,7 @@ async function skipBioRegister(){
   showLoading(true);
   const {error}=await sb.auth.sendOtp(email);
   showLoading(false);
-  if(error){clearAuthState();showScreen('loginScreen');document.getElementById('loginErr').textContent='Could not send code: '+error.message;document.getElementById('loginErr').style.display='block';return;}
+  if(error){ otpSendFailed(error.message); return; }
   pendingOtpEmail=email;
   document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
   showScreen('otpScreen'); setTimeout(()=>document.getElementById('o1').focus(),100);
@@ -325,6 +325,7 @@ function switchTab(t){
   document.getElementById('forgotPasswordLink').style.display = t==='in'?'block':'none';
   document.getElementById('authBtn').textContent = t==='in'?'Sign In →':'Create Account →';
   document.getElementById('loginErr').style.display='none';
+  document.getElementById('pwOnlyBtn').style.display='none';
 }
 
 async function doAuth(){
@@ -372,7 +373,7 @@ async function doAuth(){
 
       // Step 3: biometric not available → email OTP fallback
       const {error:otpErr} = await sb.auth.sendOtp(email);
-      if(otpErr) throw otpErr;
+      if(otpErr){ otpSendFailed(otpErr.message); return; }
       pendingOtpEmail = email;
       showLoading(false);
       document.getElementById('otpSubtext').textContent='We sent a 6-digit code to '+email+'. Enter it below.';
@@ -418,6 +419,29 @@ async function forgotPassword(){
   }
 }
 
+// The password was already verified by signInWithPassword; the second factor
+// (email OTP) just couldn't be delivered — usually the Supabase free-tier email
+// rate limit. Rather than dead-end, keep the valid session and let the user in
+// with password only for this session.
+function otpSendFailed(msg){
+  showLoading(false);
+  showScreen('loginScreen');
+  const err=document.getElementById('loginErr');
+  err.style.cssText='display:block';
+  err.textContent=(msg||'Could not send the email code.')+' You can continue with your password for this session.';
+  const b=document.getElementById('pwOnlyBtn');
+  if(b) b.style.display='block';
+}
+
+async function proceedPasswordOnly(){
+  const b=document.getElementById('pwOnlyBtn');
+  if(b) b.style.display='none';
+  if(!pendingPasswordSession){ showScreen('loginScreen'); return; }
+  showLoading(true);
+  showScreen(null);
+  await initApp(pendingPasswordSession);
+}
+
 async function initApp(session){
   currentUser = session.user;
   // Find employee record
@@ -456,7 +480,10 @@ async function doLogout(){
   document.getElementById('loginScreen').style.display='flex';
   document.getElementById('loginEmail').value='';
   document.getElementById('loginPass').value='';
+  document.getElementById('loginPass').type='password';
+  document.getElementById('_ev_40').textContent='👁️';
   document.getElementById('loginErr').style.display='none';
+  document.getElementById('pwOnlyBtn').style.display='none';
 }
 
 // ═══════════════════════════════════════════════
@@ -2086,5 +2113,8 @@ function renderMy13th(){
     document.getElementById('_ev_37').addEventListener("click", (e) => { closeModal('myAttModal') });
     document.getElementById('_ev_38').addEventListener("click", (e) => { closeModal('myAttModal') });
     document.getElementById('_ev_39').addEventListener("click", (e) => { saveMyAttNote() });
+    document.getElementById('_ev_40').addEventListener("click", (e) => { togglePasswordVisibility('loginPass','_ev_40') });
+    document.getElementById('_ev_41').addEventListener("click", (e) => { proceedPasswordOnly() });
+    document.getElementById('pwOnlyBtn').addEventListener("click", (e) => { proceedPasswordOnly() });
   });
 })();
