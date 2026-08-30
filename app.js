@@ -479,7 +479,7 @@ function normLeave(r){return{id:r.id,empId:r.emp_id,type:r.type,from:r.from_date
 function normClaim(r){return{id:r.id,empId:r.emp_id,date:r.date,category:r.category,amount:r.amount,desc:r.description,receipt:r.receipt,status:r.status,filed:r.filed_date};}
 function normPayroll(r){return{id:r.id,empId:r.emp_id,month:r.month,period:r.period||'full',grossPay:r.gross_pay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sssEr:r.sss_er||0,phicEr:r.phic_er||0,hdmfEr:r.hdmf_er||0,totalEmployerCost:r.total_employer_cost||0,withholdingTax:r.withholding_tax,totalStatutory:r.total_statutory,netPay:r.net_pay,otPay:r.ot_pay,restPay:r.rest_pay,absentDed:r.absent_ded,lateDed:r.late_ded,halfDed:r.half_ded,otHours:r.ot_hours,absent:r.absent,lwop:r.lwop,approvedClaims:r.approved_claims,commission:r.commission||0,taxableIncome:r.taxable_income,processedDate:r.processed_date,disbursementStatus:r.disbursement_status||'pending',disbursementDate:r.disbursement_date,disbursementMethod:r.disbursement_method,disbursementNote:r.disbursement_note,wiseTransferId:r.wise_transfer_id,wiseQuoteId:r.wise_quote_id};}
 
-function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn,time_out:r.timeOut,status:r.status,ot:r.ot,remarks:r.remarks};}
+function denormAtt(r){return{id:r.id,emp_id:r.empId,date:r.date,time_in:r.timeIn||null,time_out:r.timeOut||null,status:r.status,ot:r.ot,remarks:r.remarks};}
 function denormLeave(r){return{id:r.id,emp_id:r.empId,type:r.type,from_date:r.from,to_date:r.to,reason:r.reason,pay:r.pay,status:r.status,filed_date:r.filed};}
 function denormClaim(r){return{id:r.id,emp_id:r.empId,date:r.date,category:r.category,amount:r.amount,description:r.desc,receipt:r.receipt,status:r.status,filed_date:r.filed};}
 function denormPayroll(r){return{id:r.id,emp_id:r.empId,month:r.month,period:r.period||'full',gross_pay:r.grossPay,allowances:r.allowances,sss:r.sss,phic:r.phic,hdmf:r.hdmf,sss_er:r.sssEr||0,phic_er:r.phicEr||0,hdmf_er:r.hdmfEr||0,total_employer_cost:r.totalEmployerCost||0,withholding_tax:r.withholdingTax,total_statutory:r.totalStatutory,net_pay:r.netPay,ot_pay:r.otPay,rest_pay:r.restPay,absent_ded:r.absentDed,late_ded:r.lateDed,half_ded:r.halfDed,ot_hours:r.otHours,absent:r.absent,lwop:r.lwop,approved_claims:r.approvedClaims,commission:r.commission||0,taxable_income:r.taxableIncome,processed_date:r.processedDate,disbursement_status:r.disbursementStatus||'pending',disbursement_date:r.disbursementDate||null,disbursement_method:r.disbursementMethod||null,disbursement_note:r.disbursementNote||null,wise_transfer_id:r.wiseTransferId||null,wise_quote_id:r.wiseQuoteId||null};}
@@ -1900,7 +1900,7 @@ async function clockIn(){
   const td=todayLocal();
   if(DB.attendance.find(a=>a.empId===currentEmployee.id&&a.date===td)){toast('You already have a record for today.','error');return;}
   const t=nowHM();
-  const att={id:uid(),empId:currentEmployee.id,date:td,timeIn:t,timeOut:'',status:'Present',ot:0,remarks:''};
+  const att={id:uid(),empId:currentEmployee.id,date:td,timeIn:t,timeOut:null,status:'Present',ot:0,remarks:''};
   showLoading(true);
   const {error}=await sb.from('attendance').insert(denormAtt(att));
   showLoading(false);
