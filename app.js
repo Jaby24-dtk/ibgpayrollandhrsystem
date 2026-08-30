@@ -533,6 +533,8 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function fmt(n){return'₱'+Number(n||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fmtDate(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'})}
 function today(){return new Date().toISOString().split('T')[0]}
+function todayLocal(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
 function currentMonth(){return document.getElementById('globalMonth')?.value||new Date().toISOString().slice(0,7)}
 function monthLabel(ym){const[y,m]=ym.split('-');const n=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return n[+m]+' '+y}
 function daysBetween(a,b){return Math.max(1,Math.round((new Date(b)-new Date(a))/(1000*60*60*24))+1)}
@@ -1863,14 +1865,92 @@ function profileRow(label,val){return`<div><div style="font-size:11px;color:#9a7
 function renderMyAttendance(){
   const m=currentMonth();
   const myAtt=DB.attendance.filter(a=>a.empId===currentEmployee.id&&a.date&&a.date.startsWith(m));
+  const td=todayLocal();
+  const rec=DB.attendance.find(a=>a.empId===currentEmployee.id&&a.date===td);
+  let clock;
+  if(currentRole==='viewer'){
+    clock='<div class="section-sub">Viewer accounts cannot record attendance.</div>';
+  } else if(!rec){
+    clock=`<div class="section-sub" style="margin-bottom:12px">You haven't timed in today.</div>
+      <button class="btn btn-primary" ${act('clockIn')}>🕐 Time In</button>`;
+  } else if(rec.timeIn&&!rec.timeOut){
+    clock=`<div class="section-sub" style="margin-bottom:12px">Timed in at <strong>${rec.timeIn}</strong>.</div>
+      <button class="btn btn-primary" ${act('clockOut')}>🕔 Time Out</button>`;
+  } else {
+    clock=`<div class="section-sub">Timed in <strong>${rec.timeIn||'—'}</strong> · out <strong>${rec.timeOut||'—'}</strong> — you're all set for today.</div>`;
+  }
   document.getElementById('content').innerHTML=`
     <div class="section-header"><div><div class="section-title">My Attendance — ${monthLabel(m)}</div><div class="section-sub">${myAtt.length} records</div></div></div>
-    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hours</th><th>Remarks</th></tr></thead><tbody>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px">
+      <div style="font-weight:600;color:#3d1a26;margin-bottom:6px">${fmtDate(td)}</div>
+      ${clock}
+      <div style="font-size:11px;color:var(--gray);margin-top:12px">Times can't be changed once recorded. If something's wrong, add a note and HR will adjust it.</div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hours</th><th>Remarks</th><th></th></tr></thead><tbody>
     ${myAtt.length?myAtt.sort((a,b)=>b.date.localeCompare(a.date)).map(a=>`<tr>
       <td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
-      <td>${statusBadge(a.status)}</td><td>${a.ot>0?a.ot+' hrs':'—'}</td><td>${a.remarks||'—'}</td>
-    </tr>`).join(''):'<tr><td colspan="6" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
+      <td>${statusBadge(a.status)}</td><td>${a.ot>0?a.ot+' hrs':'—'}</td><td>${a.remarks?esc(a.remarks):'—'}</td>
+      <td>${currentRole!=='viewer'?`<button class="btn btn-ghost btn-sm" ${act('openMyAttNote',a.id)}>📝 Note</button>`:''}</td>
+    </tr>`).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
     </tbody></table></div>`;
+}
+
+async function clockIn(){
+  if(currentRole==='viewer')return;
+  const td=todayLocal();
+  if(DB.attendance.find(a=>a.empId===currentEmployee.id&&a.date===td)){toast('You already have a record for today.','error');return;}
+  const t=nowHM();
+  const att={id:uid(),empId:currentEmployee.id,date:td,timeIn:t,timeOut:'',status:'Present',ot:0,remarks:''};
+  showLoading(true);
+  const {error}=await sb.from('attendance').insert(denormAtt(att));
+  showLoading(false);
+  if(error){toast(error.message,'error');return;}
+  DB.attendance.unshift(att);
+  toast('Timed in at '+t);
+  renderMyAttendance();
+}
+
+async function clockOut(){
+  if(currentRole==='viewer')return;
+  const td=todayLocal();
+  const rec=DB.attendance.find(a=>a.empId===currentEmployee.id&&a.date===td);
+  if(!rec){toast('No time-in record for today yet.','error');return;}
+  if(rec.timeOut){toast('You already timed out at '+rec.timeOut+'. Add a note if it needs correcting.','error');return;}
+  const t=nowHM();
+  showLoading(true);
+  const {error}=await sb.from('attendance').update({time_out:t}).eq('id',rec.id);
+  showLoading(false);
+  if(error){toast(error.message,'error');return;}
+  rec.timeOut=t;
+  toast('Timed out at '+t);
+  renderMyAttendance();
+}
+
+let myAttNoteId=null;
+function openMyAttNote(id){
+  const a=DB.attendance.find(x=>x.id===id);
+  if(!a||a.empId!==currentEmployee.id){toast('Record not found.','error');return;}
+  myAttNoteId=id;
+  document.getElementById('ma_summary').textContent=`${fmtDate(a.date)} — in ${a.timeIn||'—'}, out ${a.timeOut||'—'}`;
+  document.getElementById('ma_remarks').value=a.remarks||'';
+  openModal('myAttModal');
+}
+
+async function saveMyAttNote(){
+  if(currentRole==='viewer')return;
+  if(!myAttNoteId)return;
+  const a=DB.attendance.find(x=>x.id===myAttNoteId);
+  if(!a||a.empId!==currentEmployee.id){toast('Record not found.','error');return;}
+  const remarks=document.getElementById('ma_remarks').value.trim();
+  showLoading(true);
+  const {error}=await sb.from('attendance').update({remarks}).eq('id',myAttNoteId);
+  showLoading(false);
+  if(error){toast(error.message,'error');return;}
+  a.remarks=remarks;
+  closeModal('myAttModal');
+  myAttNoteId=null;
+  toast('Note saved.');
+  renderMyAttendance();
 }
 
 function renderMy13th(){
@@ -2003,5 +2083,8 @@ function renderMy13th(){
     document.getElementById('_ev_34').addEventListener("click", (e) => { submitWiseRelease() });
     document.getElementById('_ev_35').addEventListener("click", (e) => { closeModal('releaseModal') });
     document.getElementById('_ev_36').addEventListener("click", (e) => { submitMarkSent() });
+    document.getElementById('_ev_37').addEventListener("click", (e) => { closeModal('myAttModal') });
+    document.getElementById('_ev_38').addEventListener("click", (e) => { closeModal('myAttModal') });
+    document.getElementById('_ev_39').addEventListener("click", (e) => { saveMyAttNote() });
   });
 })();
