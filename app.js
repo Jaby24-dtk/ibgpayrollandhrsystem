@@ -36,12 +36,31 @@ const sb = (function(){
   const aH = () => ({...bH,...(_sess?{'Authorization':'Bearer '+_sess.access_token}:{})});
   const dH = () => ({...bH,'Authorization':'Bearer '+(_sess&&_sess.access_token||SUPABASE_KEY)});
 
+  // Access tokens expire (~1h). Renew shortly before expiry so a tab left
+  // open keeps working; single-flight so parallel calls share one refresh.
+  let _refreshing = null;
+  function _expAt(s){
+    if(s.expires_at) return s.expires_at;
+    try{return JSON.parse(atob(s.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).exp;}catch(e){return 0;}
+  }
+  async function ensureFresh(){
+    if(!_sess||!_sess.refresh_token) return;
+    if(_expAt(_sess)-Date.now()/1000>60) return;
+    if(!_refreshing) _refreshing=(async()=>{
+      const r=await gof('/token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:_sess.refresh_token})});
+      if(!r.error&&r.data&&r.data.access_token){_sess={...r.data,user:r.data.user||_sess.user};_ev.forEach(cb=>cb('TOKEN_REFRESHED',_sess));}
+      else if(r.error&&/invalid|not found|revoked|already used/i.test(r.error.message||'')){_sess=null;_ev.forEach(cb=>cb('SIGNED_OUT',null));}
+    })().finally(()=>{_refreshing=null;});
+    await _refreshing;
+  }
+
   async function gof(path, opts={}){
     const r = await fetch(SUPABASE_URL+'/auth/v1'+path,{...opts,headers:{...bH,...(opts.headers||{})}});
     const b = await r.json().catch(()=>({}));
     return r.ok?{data:b,error:null}:{data:null,error:{message:b.msg||b.error_description||b.message||b.code||JSON.stringify(b)}};
   }
   async function pgf(path, opts={}){
+    await ensureFresh();
     const r = await fetch(SUPABASE_URL+'/rest/v1'+path,{...opts,headers:{...dH(),...(opts.headers||{})}});
     if(r.status===204) return {data:null,error:null};
     const b = await r.json().catch(()=>({}));
@@ -84,7 +103,7 @@ const sb = (function(){
     from:tbl=>qb(tbl),
     rpc:(fn,p)=>pgf('/rpc/'+fn,{method:'POST',body:JSON.stringify(p)}),
     auth:{
-      getSession:async()=>({data:{session:_sess},error:null}),
+      getSession:async()=>{await ensureFresh();return{data:{session:_sess},error:null};},
       setSession:async({access_token,refresh_token})=>{
         const r=await gof('/user',{method:'GET',headers:{'Authorization':'Bearer '+access_token}});
         if(r.error)return r;
@@ -1043,6 +1062,7 @@ async function callInviteUserFn(body,retriesLeft=2){
   // cache right after deploys and errors with "invalid JWT ... unrecognized
   // kid" even for a genuinely valid session — this clears within a second,
   // so retry transparently rather than surfacing it as a real auth failure.
+  if(!res.ok && !data.error && data.message) data.error=data.message;
   if(!res.ok && retriesLeft>0 && /invalid jwt|unrecognized jwt|unable to (parse|verify)/i.test(data.error||'')){
     await new Promise(r=>setTimeout(r,900));
     return callInviteUserFn(body,retriesLeft-1);
@@ -1337,8 +1357,8 @@ async function releasePayroll(payrollIds){
         headers:{'Content-Type':'application/json','Authorization':`Bearer ${(await sb.auth.getSession()).data.session?.access_token}`},
         body:JSON.stringify({payroll_ids:bankIds})
       });
-      const data=await res.json();
-      if(!res.ok){showLoading(false);toast(data.error||'Wise disbursement failed','error');renderPayroll();return;}
+      const data=await res.json().catch(()=>({}));
+      if(!res.ok){showLoading(false);toast(data.error||data.message||'Wise disbursement failed','error');renderPayroll();return;}
       for(const r of data.results){
         const idx=DB.payroll.findIndex(p=>p.id===r.id);
         if(idx>=0){
