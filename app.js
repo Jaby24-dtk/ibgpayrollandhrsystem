@@ -8,6 +8,26 @@ function esc(s){
     .replace(/'/g,'&#39;');
 }
 
+// ── Claim receipts ──────────────────────────────
+// Receipts sit in the private "claims-receipts" bucket and open through a
+// 2-minute signed link. Older claims stored a public URL; take the path from it.
+function receiptPath(r){
+  const m=String(r||'').match(/\/claims-receipts\/([^?#]+)/);
+  if(m) return decodeURIComponent(m[1]);
+  return /^receipts\//.test(r||'')?r:'';
+}
+function receiptCell(r){
+  const p=receiptPath(r);
+  if(!p) return r?esc(r):'—';
+  return `<a role="button" tabindex="0" ${act('openReceipt',p)} style="color:var(--maroon);font-size:12px;cursor:pointer">📎 View</a>`;
+}
+async function openReceipt(path){
+  const w=window.open('','_blank');
+  const {data,error}=await sb.storage.from('claims-receipts').createSignedUrl(path,120);
+  if(error||!data){if(w)w.close();toast('Could not open receipt: '+(error?error.message:'unknown error'),'error');return;}
+  if(w){w.opener=null;w.location.href=data.signedUrl;}else location.href=data.signedUrl;
+}
+
 // ── Brute-force login protection ────────────────
 const _BF_MAX = 5;
 const _BF_MS  = 15 * 60 * 1000;
@@ -99,7 +119,25 @@ const sb = (function(){
     return o;
   }
 
+  // Storage: private buckets only. Uploads go through the user's session (bucket
+  // RLS decides who may write); reads are short-lived signed links, never public URLs.
+  async function stf(path,opts={}){
+    await ensureFresh();
+    const r=await fetch(SUPABASE_URL+'/storage/v1'+path,{...opts,headers:{...dH(),...(opts.headers||{})}});
+    const b=await r.json().catch(()=>({}));
+    return r.ok?{data:b,error:null}:{data:null,error:{message:b.message||b.error||JSON.stringify(b)}};
+  }
+  const encPath=p=>p.split('/').map(encodeURIComponent).join('/');
+  const storage={from:bucket=>({
+    upload:(path,file,{contentType,upsert=false}={})=>stf('/object/'+bucket+'/'+encPath(path),{method:'POST',body:file,headers:{'Content-Type':contentType||file.type||'application/octet-stream','x-upsert':String(upsert)}}),
+    createSignedUrl:async(path,expiresIn)=>{
+      const r=await stf('/object/sign/'+bucket+'/'+encPath(path),{method:'POST',body:JSON.stringify({expiresIn}),headers:{'Content-Type':'application/json'}});
+      return r.error?r:{data:{signedUrl:SUPABASE_URL+'/storage/v1'+r.data.signedURL},error:null};
+    }
+  })};
+
   return{
+    storage,
     from:tbl=>qb(tbl),
     rpc:(fn,p)=>pgf('/rpc/'+fn,{method:'POST',body:JSON.stringify(p)}),
     auth:{
@@ -1084,7 +1122,7 @@ function renderAttendance(){
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>OT Hrs</th><th>Remarks</th><th></th></tr></thead><tbody>
     ${atts.length?atts.map(a=>{const e=DB.employees.find(x=>x.id===a.empId);return`<tr>
       <td>${e?e.name:'—'}</td><td>${fmtDate(a.date)}</td><td>${a.timeIn||'—'}</td><td>${a.timeOut||'—'}</td>
-      <td>${statusBadge(a.status)}</td><td>${a.ot||0}</td><td>${a.remarks||'—'}</td>
+      <td>${statusBadge(a.status)}</td><td>${a.ot||0}</td><td>${esc(a.remarks||'—')}</td>
       <td>${canEdit()?`<button class="btn btn-danger btn-sm" ${act('deleteAttendance',a.id)}>🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">📅</div>No attendance records for this month.</td></tr>'}
     </tbody></table></div>`;
@@ -1137,7 +1175,7 @@ function renderLeaves(){
     ${DB.leaves.length?DB.leaves.map(l=>{const e=DB.employees.find(x=>x.id===l.empId);return`<tr>
       <td>${e?e.name.split(',')[0]:'—'}</td><td>${l.type}</td><td>${fmtDate(l.from)}</td><td>${fmtDate(l.to)}</td>
       <td>${l.pay==='1'?'<span class="badge badge-green">With Pay</span>':'<span class="badge badge-red">LWOP</span>'}</td>
-      <td>${statusBadge(l.status)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${l.reason||'—'}</td>
+      <td>${statusBadge(l.status)}</td><td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${esc(l.reason||'—')}</td>
       <td style="white-space:nowrap">${canEdit()?`${l.status==='Pending'?`<button class="btn btn-success btn-sm" ${act('updateLeave',l.id,'Approved')}>✓</button> <button class="btn btn-danger btn-sm" ${act('updateLeave',l.id,'Rejected')}>✗</button> `:''}
         <button class="btn btn-ghost btn-sm" style="color:#dc3545;font-size:11px" ${act('deleteLeave',l.id)}>🗑️</button>`:''}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">🌿</div>No leave requests.</td></tr>'}
@@ -1214,8 +1252,8 @@ function renderClaims(){
     </div>
     <div class="table-wrap"><table><thead><tr><th>Employee</th><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Actions</th></tr></thead><tbody>
     ${DB.claims.length?DB.claims.map(c=>{const e=DB.employees.find(x=>x.id===c.empId);return`<tr>
-      <td>${e?e.name.split(',')[0]:'—'}</td><td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td><td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
+      <td>${e?e.name.split(',')[0]:'—'}</td><td>${fmtDate(c.date)}</td><td>${esc(c.category)}</td><td>${fmt(c.amount)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${esc(c.desc||'—')}</td><td>${receiptCell(c.receipt)}</td>
       <td>${statusBadge(c.status)}</td>
       <td>${canEdit()&&c.status==='Pending'?`<button class="btn btn-success btn-sm" ${act('updateClaim',c.id,'Approved')}>✓</button> <button class="btn btn-danger btn-sm" ${act('updateClaim',c.id,'Rejected')}>✗</button>`:'—'}</td>
     </tr>`}).join(''):'<tr><td colspan="8" class="no-data"><div class="no-data-icon">💼</div>No expense claims.</td></tr>'}
@@ -1254,8 +1292,7 @@ async function saveClaim(){
       toast('Receipt upload failed: '+upErr.message,'error');
       return;
     }
-    const {data:urlData}=sb.storage.from('claims-receipts').getPublicUrl(path);
-    receiptUrl=urlData.publicUrl;
+    receiptUrl=path;
     statusEl.textContent='✓ Uploaded';
   }
   const claim={id:uid(),empId,date:document.getElementById('c_date').value,category:document.getElementById('c_cat').value,amount:parseFloat(document.getElementById('c_amount').value)||0,desc:document.getElementById('c_desc').value,receipt:receiptUrl,status:'Pending',filed:today()};
@@ -1812,7 +1849,7 @@ function renderMyLeaves(){
               <td style="padding:10px 12px;text-align:center;font-weight:700;color:var(--maroon)">${daysBetween(l.from,l.to)}</td>
               <td style="padding:10px 12px">${l.pay==='1'?'<span style="background:#d4edda;color:#155724;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">With Pay</span>':'<span style="background:#f8d7da;color:#721c24;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:600">LWOP</span>'}</td>
               <td style="padding:10px 12px">${statusBadge(l.status)}</td>
-              <td style="padding:10px 12px;color:#5a6268;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.reason||'—'}</td>
+              <td style="padding:10px 12px;color:#5a6268;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(l.reason||'—')}</td>
               <td style="padding:10px 12px;color:#9a7f87;font-size:12px;white-space:nowrap">${fmtDate(l.filed)}</td>
             </tr>`).join('')}
           </tbody>
@@ -1844,9 +1881,9 @@ function renderMyClaims(){
     </div>
     <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Description</th><th>Receipt</th><th>Status</th><th>Filed</th></tr></thead><tbody>
     ${myClaims.length?myClaims.map(c=>`<tr>
-      <td>${fmtDate(c.date)}</td><td>${c.category}</td><td>${fmt(c.amount)}</td>
-      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${c.desc||'—'}</td>
-      <td>${c.receipt&&c.receipt.startsWith('http')?`<a href="${c.receipt}" target="_blank" style="color:var(--maroon);font-size:12px">📎 View</a>`:c.receipt||'—'}</td>
+      <td>${fmtDate(c.date)}</td><td>${esc(c.category)}</td><td>${fmt(c.amount)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis">${esc(c.desc||'—')}</td>
+      <td>${receiptCell(c.receipt)}</td>
       <td>${statusBadge(c.status)}</td><td>${fmtDate(c.filed)}</td>
     </tr>`).join(''):'<tr><td colspan="7" class="no-data"><div class="no-data-icon">💼</div>No expense claims yet.</td></tr>'}
     </tbody></table></div>`;
